@@ -140,12 +140,12 @@ module.exports = async (req, res) => {
     }
   }
 
-  // ── DELETE: üzvü deaktiv et ─────────────────────────────────
+  // ── DELETE: üzvü deaktiv et və ya SUPER_ADMIN üçün tam sil ───
   if (req.method === 'DELETE') {
     const user = await requirePermission(req, res, 'delete_member');
     if (!user) return;
 
-    const { id } = req.body || {};
+    const { id, permanent = false } = req.body || {};
     if (!id) return res.status(400).json({ error: 'id tələb olunur.' });
 
     try {
@@ -159,14 +159,20 @@ module.exports = async (req, res) => {
         }
       }
 
-      // Fiziki silmə yox — deaktiv edirik
+      if (permanent) {
+        if (user.role !== 'SUPER_ADMIN') return res.status(403).json({ error: 'Üzvü tam silmək yalnız Baş Admin üçün mümkündür.' });
+        if (parseInt(id) === user.id) return res.status(400).json({ error: 'Öz hesabınızı silə bilməzsiniz.' });
+        const target = await sql`SELECT full_name, role FROM users WHERE id = ${parseInt(id)} LIMIT 1`;
+        if (!target[0]) return res.status(404).json({ error: 'Üzv tapılmadı.' });
+        if (target[0].role === 'SUPER_ADMIN') return res.status(400).json({ error: 'Baş Admin hesabını buradan silmək olmaz.' });
+        await sql`DELETE FROM users WHERE id = ${parseInt(id)}`;
+        await logActivity(user, `Üzv tam silindi: ${target[0].full_name} (id:${id})`, { targetType: 'user', targetId: parseInt(id), targetName: target[0].full_name, ip });
+        return res.status(200).json({ ok: true, deleted: true });
+      }
+
       await sql`UPDATE users SET active = false WHERE id = ${parseInt(id)}`;
-
-      await logActivity(user, `Üzv deaktiv edildi (id:${id})`, {
-        targetType: 'user', targetId: parseInt(id), ip
-      });
-
-      return res.status(200).json({ ok: true });
+      await logActivity(user, `Üzv deaktiv edildi (id:${id})`, { targetType: 'user', targetId: parseInt(id), ip });
+      return res.status(200).json({ ok: true, deactivated: true });
     } catch (e) {
       return res.status(500).json({ error: 'Server xətası.' });
     }
