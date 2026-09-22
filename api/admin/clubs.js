@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
     const user = await requirePermission(req, res, 'manage_clubs');
     if (!user) return;
 
-    const { name, description, logoUrl } = req.body || {};
+    const { name, description, logoUrl, instagramUrl, tiktokUrl, whatsappUrl, telegramUrl } = req.body || {};
     if (!name || typeof name !== 'string' || name.trim().length < 2) {
       return res.status(400).json({ error: 'Klub adı tələb olunur.' });
     }
@@ -40,8 +40,8 @@ module.exports = async (req, res) => {
     try {
       const sql = db();
       const rows = await sql`
-        INSERT INTO clubs(name, description, logo_url)
-        VALUES(${name.trim()}, ${description || ''}, ${logoUrl || null})
+        INSERT INTO clubs(name, description, logo_url, instagram_url, tiktok_url, whatsapp_url, telegram_url)
+        VALUES(${name.trim()}, ${description || ''}, ${logoUrl || null}, ${instagramUrl || null}, ${tiktokUrl || null}, ${whatsappUrl || null}, ${telegramUrl || null})
         RETURNING id
       `;
       await logActivity(user, `Yeni klub yaratdı: ${name.trim()}`, {
@@ -60,7 +60,7 @@ module.exports = async (req, res) => {
     const user = await requirePermission(req, res, 'manage_clubs');
     if (!user) return;
 
-    const { id, name, description, logoUrl } = req.body || {};
+    const { id, name, description, logoUrl, instagramUrl, tiktokUrl, whatsappUrl, telegramUrl } = req.body || {};
     if (!id) return res.status(400).json({ error: 'id tələb olunur.' });
 
     try {
@@ -69,7 +69,11 @@ module.exports = async (req, res) => {
         UPDATE clubs
         SET name        = COALESCE(${name        || null}, name),
             description = COALESCE(${description || null}, description),
-            logo_url    = ${logoUrl !== undefined ? (logoUrl || null) : null}
+            logo_url    = ${logoUrl !== undefined ? (logoUrl || null) : null},
+            instagram_url = ${instagramUrl !== undefined ? (instagramUrl || null) : null},
+            tiktok_url    = ${tiktokUrl !== undefined ? (tiktokUrl || null) : null},
+            whatsapp_url  = ${whatsappUrl !== undefined ? (whatsappUrl || null) : null},
+            telegram_url  = ${telegramUrl !== undefined ? (telegramUrl || null) : null}
         WHERE id = ${parseInt(id)}
       `;
       await logActivity(user, `Klub məlumatlarını yenilədi (id:${id})`, {
