@@ -139,3 +139,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Bitti. Migration uğurlu tamamlandı.
+
+
+-- Club social media + flexible club management positions
+ALTER TABLE clubs ADD COLUMN IF NOT EXISTS instagram_url TEXT;
+ALTER TABLE clubs ADD COLUMN IF NOT EXISTS tiktok_url TEXT;
+ALTER TABLE clubs ADD COLUMN IF NOT EXISTS whatsapp_url TEXT;
+ALTER TABLE clubs ADD COLUMN IF NOT EXISTS telegram_url TEXT;
