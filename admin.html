@@ -1974,7 +1974,7 @@
       // Set user badges
       document.getElementById('badgeName').textContent = currentUser.fullName || 'Administrator';
       document.getElementById('badgeAvatar').textContent = (currentUser.fullName || 'A')[0].toUpperCase();
-      document.getElementById('badgeRole').textContent = currentUser.role;
+      document.getElementById('badgeRole').textContent = roleLabel(currentUser.role);
       const clearLogsBtn=document.getElementById('btnClearLogs'); if(clearLogsBtn) clearLogsBtn.style.display=currentUser.role==='SUPER_ADMIN'?'inline-flex':'none';
 
       // Adjust permissions visibility
@@ -2015,8 +2015,9 @@
       }
 
       // CHAIR scope notice
-      if (currentUser.role === 'CHAIR') {
+      if (currentUser.role === 'CHAIR' || currentUser.role === 'VICE_CHAIR') {
         document.getElementById('chairNoticeBox').style.display = 'flex';
+        document.querySelector('#chairNoticeBox strong').textContent = currentUser.role === 'CHAIR' ? 'Klub Sədri Rejimi:' : 'Sədr Müavini Rejimi:';
         document.getElementById('chairClubNameLabel').textContent = currentUser.clubName || 'Öz Klubunuz';
         document.getElementById('clubScopeIndicator').style.display = 'inline-flex';
         document.getElementById('clubScopeName').textContent = currentUser.clubName || 'Klub';
@@ -2076,7 +2077,7 @@
       });
 
       // If user is CHAIR, lock club select
-      if (currentUser && currentUser.role === 'CHAIR') {
+      if (currentUser && ['CHAIR','VICE_CHAIR'].includes(currentUser.role)) {
         const newMemClub = document.getElementById('newMemClub');
         if (newMemClub && currentUser.clubId) {
           newMemClub.value = currentUser.clubId;
@@ -2179,7 +2180,7 @@
     // Create member
     function openCreateMemberModal() {
       document.getElementById('formCreateMember').reset();
-      if (currentUser.role === 'CHAIR' && currentUser.clubId) {
+      if (['CHAIR','VICE_CHAIR'].includes(currentUser.role) && currentUser.clubId) {
         document.getElementById('newMemClub').value = currentUser.clubId;
         document.getElementById('newMemRole').value = 'MEMBER';
       }
