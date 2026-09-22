@@ -146,3 +146,7 @@ ALTER TABLE clubs ADD COLUMN IF NOT EXISTS instagram_url TEXT;
 ALTER TABLE clubs ADD COLUMN IF NOT EXISTS tiktok_url TEXT;
 ALTER TABLE clubs ADD COLUMN IF NOT EXISTS whatsapp_url TEXT;
 ALTER TABLE clubs ADD COLUMN IF NOT EXISTS telegram_url TEXT;
+
+
+-- Event cover image support
+ALTER TABLE events ADD COLUMN IF NOT EXISTS cover_url TEXT;
