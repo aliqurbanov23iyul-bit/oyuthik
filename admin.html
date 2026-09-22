@@ -2628,7 +2628,7 @@
       document.getElementById('attendeeModalTitle').textContent=title+' — İştirakçılar';
       document.getElementById('attendeeModalCount').textContent='Yüklənir...';
       document.getElementById('eventAttendeeList').innerHTML='<p>Yüklənir...</p>';openModal('modalEventAttendees');
-      try{const d=await api('/admin/event-attendees?id='+id);document.getElementById('attendeeModalCount').textContent=d.count+' tələbə qatılır';
+      try{const d=await api('/admin/events?attendees=1&id='+id);document.getElementById('attendeeModalCount').textContent=d.count+' tələbə qatılır';
       document.getElementById('eventAttendeeList').innerHTML=d.attendees.length?d.attendees.map(x=>'<div class="attendee-admin-row"><div class="attendee-admin-avatar">'+(x.photo_url?'<img src="'+esc(x.photo_url)+'">':esc((x.full_name||'?')[0]))+'</div><div><b>'+esc(x.full_name)+'</b><p>'+esc(x.group_no||'Qrup yoxdur')+(x.faculty?' • '+esc(x.faculty):'')+'</p><small>'+esc(x.member_code||'')+(x.club_name?' • '+esc(x.club_name):'')+'</small></div></div>').join(''):'<div class="empty-admin-state">Hələ heç kim tədbirə qatılmayıb.</div>'}catch(e){document.getElementById('eventAttendeeList').innerHTML='<p>'+esc(e.message||'Xəta')+'</p>'}
     }
 
