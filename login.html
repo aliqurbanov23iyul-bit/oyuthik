@@ -267,7 +267,7 @@
     (async () => {
       try {
         const d = await api('/auth/me?type=member');
-        if (d.ok) location.href = 'dashboard.html';
+        if (d.ok) location.href = 'index.html';
       } catch (_) {}
     })();
 
@@ -288,7 +288,7 @@
 
         if (d.ok) {
           // Cookie is set by server — just redirect
-          location.href = 'dashboard.html';
+          location.href = 'index.html';
         }
       } catch (err) {
         errorMsg.textContent = err.message || 'Giriş məlumatları yanlışdır.';
