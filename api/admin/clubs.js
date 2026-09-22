@@ -4,14 +4,15 @@
  * PATCH /api/admin/clubs — update club
  */
 const { db }               = require('../_db');
-const { requirePermission, logActivity, getClientIp } = require('../_auth');
+const { requirePermission, requireAdminAuth, logActivity, getClientIp } = require('../_auth');
 
 module.exports = async (req, res) => {
   const ip = getClientIp(req);
 
   if (req.method === 'GET') {
-    const user = await requirePermission(req, res, 'manage_clubs');
+    const user = await requireAdminAuth(req, res);
     if (!user) return;
+    if (!['SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR'].includes(user.role)) return res.status(403).json({error:'Klub məlumatlarına giriş icazəniz yoxdur.'});
 
     try {
       const sql = db();
@@ -23,11 +24,18 @@ module.exports = async (req, res) => {
         const members=await sql`SELECT id,full_name,group_no,faculty,role,member_code,active,position_in_club,photo_url,joined_at FROM users WHERE club_id=${clubId} ORDER BY CASE WHEN role='CHAIR' THEN 0 WHEN role='VICE_CHAIR' THEN 1 ELSE 2 END, full_name`;
         return res.status(200).json({club:club[0],members});
       }
-      const clubs = await sql`
+      const clubs = ['SUPER_ADMIN','ADMIN'].includes(user.role) ? await sql`
         SELECT c.*, count(u.id)::int member_count,
           MAX(CASE WHEN u.role='CHAIR' THEN u.full_name END) chair_name,
           MAX(CASE WHEN u.role='VICE_CHAIR' THEN u.full_name END) vice_chair_name
         FROM clubs c LEFT JOIN users u ON u.club_id=c.id AND u.active=true
+        GROUP BY c.id ORDER BY c.name
+      ` : await sql`
+        SELECT c.*, count(u.id)::int member_count,
+          MAX(CASE WHEN u.role='CHAIR' THEN u.full_name END) chair_name,
+          MAX(CASE WHEN u.role='VICE_CHAIR' THEN u.full_name END) vice_chair_name
+        FROM clubs c LEFT JOIN users u ON u.club_id=c.id AND u.active=true
+        WHERE c.id=${user.club_id}
         GROUP BY c.id ORDER BY c.name
       `;
       return res.status(200).json({ clubs });
@@ -65,11 +73,17 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'PATCH') {
-    const user = await requirePermission(req, res, 'manage_clubs');
+    const user = await requireAdminAuth(req, res);
     if (!user) return;
 
     const { id, name, description, logoUrl, instagramUrl, tiktokUrl, whatsappUrl, telegramUrl, leadershipAction, memberId } = req.body || {};
     if (!id) return res.status(400).json({ error: 'id tələb olunur.' });
+    if (!['SUPER_ADMIN','ADMIN'].includes(user.role) && parseInt(id) !== user.club_id) {
+      return res.status(403).json({ error: 'Yalnız öz klubunuzu idarə edə bilərsiniz.' });
+    }
+    if (!['SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR'].includes(user.role)) {
+      return res.status(403).json({ error: 'Klub idarəetmə icazəniz yoxdur.' });
+    }
 
     try {
       const sql = db();
