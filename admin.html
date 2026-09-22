@@ -335,6 +335,7 @@
       border-color: rgba(220,38,38,0.3);
     }
 
+    .club-admin-leaders{display:grid;grid-template-columns:1fr 1fr;gap:12px}.club-admin-leader{padding:17px;border:1px solid var(--admin-border);border-radius:16px;background:#f8fbff;display:grid;gap:6px}.club-admin-leader small{color:var(--admin-royal);font-weight:900;letter-spacing:.7px}.club-admin-leader b{font-size:16px}.club-admin-leader span{font-size:12px;color:var(--admin-muted)}.club-admin-leader .btn-action{width:max-content;margin-top:5px}.club-roster-row{display:flex;align-items:center;gap:11px;padding:11px 3px;border-bottom:1px solid var(--admin-border)}.club-roster-no{width:25px;color:var(--admin-muted);font-weight:800}.club-roster-person{flex:1;min-width:0}.club-roster-person b,.club-roster-person small{display:block}.club-roster-person small{margin-top:3px;color:var(--admin-muted);font-size:11px}@media(max-width:650px){.club-admin-leaders{grid-template-columns:1fr}.club-roster-row{flex-wrap:wrap}}
     .attendee-admin-row{display:flex;align-items:center;gap:13px;padding:13px 4px;border-bottom:1px solid var(--admin-border)}.attendee-admin-avatar{width:48px;height:48px;flex:0 0 48px;border-radius:14px;background:#e7f0ff;color:var(--admin-royal);display:grid;place-items:center;font-weight:900;overflow:hidden}.attendee-admin-avatar img{width:100%;height:100%;object-fit:cover}.attendee-admin-row b{font-size:14px}.attendee-admin-row p,.attendee-admin-row small{margin:3px 0 0;color:var(--admin-muted);font-size:11px}.empty-admin-state{text-align:center;padding:35px;color:var(--admin-muted)}
     .event-datetime-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.event-datetime-grid>div{background:#f8fbff;border:1px solid var(--admin-border);border-radius:13px;padding:10px 12px}.event-datetime-grid input{border:0!important;background:transparent!important;padding:6px 0 1px!important;font-size:16px!important;font-weight:750;color:#10213d;width:100%;box-shadow:none!important}.time24-wrap{display:flex;align-items:center;gap:7px}.time24-wrap select{appearance:none;-webkit-appearance:none;border:0;background:#fff;border-radius:9px;padding:7px 10px;font-size:16px;font-weight:800;color:#10213d;min-width:62px;text-align:center;box-shadow:0 1px 4px rgba(10,36,83,.08)}.time24-wrap b{font-size:18px;color:#55708f}.field-mini-label{display:flex;align-items:center;gap:6px;color:#55708f;font-size:11px;font-weight:800;margin-bottom:3px}.datetime-help{display:block;margin-top:7px;color:var(--admin-muted);font-size:11px}@media(max-width:520px){.event-datetime-grid{grid-template-columns:1fr}}
     .management-board-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
@@ -1151,6 +1152,7 @@
               <option value="SUPER_ADMIN">Baş Admin</option>
               <option value="ADMIN">Admin</option>
               <option value="CHAIR">Klub Sədri</option>
+              <option value="VICE_CHAIR">Sədr Müavini</option>
               <option value="MEMBER">Üzv</option>
             </select>
           </div>
@@ -1576,7 +1578,8 @@
             </div>
           </div>
           <div class="form-grid-2">
-            <div class="form-group"><label for="editMemRole">Rol</label><select id="editMemRole" name="role"><option value="MEMBER">Üzv</option><option value="CHAIR">Klub Sədri</option><option value="ADMIN">Administrator</option><option value="SUPER_ADMIN">Baş Administrator</option></select></div>
+            <div class="form-group"><label for="editMemRole">Rol</label><select id="editMemRole" name="role"><option value="MEMBER">Üzv</option><option value="CHAIR">Klub Sədri</option>
+              <option value="VICE_CHAIR">Sədr Müavini</option><option value="ADMIN">Administrator</option><option value="SUPER_ADMIN">Baş Administrator</option></select></div>
             <div class="form-group"><label for="editMemClub">Klub</label><select id="editMemClub" name="clubId"><option value="">THİK / Klubsuz</option></select></div>
           </div>
           <div class="form-group">
@@ -1775,6 +1778,14 @@
 
   <!-- APP JS & CONTROLLER SCRIPT -->
   
+  <div class="admin-modal" id="modalClubInfo">
+    <div class="admin-modal-card" style="width:min(920px,100%)">
+      <div class="modal-head"><div><h3 id="clubInfoTitle">Klub məlumatları</h3><p id="clubInfoMeta" style="margin:4px 0 0;color:var(--admin-muted);font-size:12px"></p></div><button class="modal-close" onclick="closeModal('modalClubInfo')">×</button></div>
+      <div class="modal-body"><div id="clubLeadershipCards"></div><h4 style="margin:22px 0 10px">Klub üzvləri</h4><div id="clubInfoMembers"></div></div>
+      <div class="modal-foot"><button class="btn-action" onclick="closeModal('modalClubInfo')">Bağla</button></div>
+    </div>
+  </div>
+
   <!-- Event Attendees Modal -->
   <div class="admin-modal" id="modalEventAttendees">
     <div class="admin-modal-card" style="width:min(760px,100%)">
@@ -2270,7 +2281,7 @@
     function renderManagementBoard(){
       const el=document.getElementById('managementBoardGrid'); if(!el)return;
       const people=allMembers.filter(m=>['SUPER_ADMIN','ADMIN','CHAIR'].includes(m.role));
-      el.innerHTML=people.length?people.map(m=>'<article class="board-person-card"><div class="board-avatar">'+(m.photo_url?'<img src="'+esc(m.photo_url)+'">':esc((m.full_name||'?')[0]))+'</div><div><span class="role-badge role-'+m.role+'">'+esc(m.role==='SUPER_ADMIN'?'Baş Administrator':m.role==='ADMIN'?'Administrator':'Klub Sədri')+'</span><h4>'+esc(m.full_name)+'</h4><p>'+esc(m.club_name||'OYU THİK')+(m.position_in_club?' • '+esc(m.position_in_club):'')+'</p><button class="btn-action" onclick="openEditMemberModal('+m.id+')"><i class="fa-solid fa-pen"></i> İdarə et</button></div></article>').join(''):'<p>İdarəetmə heyəti tapılmadı.</p>';
+      el.innerHTML=people.length?people.map(m=>'<article class="board-person-card"><div class="board-avatar">'+(m.photo_url?'<img src="'+esc(m.photo_url)+'">':esc((m.full_name||'?')[0]))+'</div><div><span class="role-badge role-'+m.role+'">'+esc(m.role==='SUPER_ADMIN'?'Baş Administrator':m.role==='ADMIN'?'Administrator':m.role==='CHAIR'?'Klub Sədri':m.role==='VICE_CHAIR'?'Sədr Müavini':'Üzv')+'</span><h4>'+esc(m.full_name)+'</h4><p>'+esc(m.club_name||'OYU THİK')+(m.position_in_club?' • '+esc(m.position_in_club):'')+'</p><button class="btn-action" onclick="openEditMemberModal('+m.id+')"><i class="fa-solid fa-pen"></i> İdarə et</button></div></article>').join(''):'<p>İdarəetmə heyəti tapılmadı.</p>';
     }
     async function clearAllLogs(){if(!confirm('Bütün fəaliyyət logları silinəcək. Davam edilsin?'))return;try{await api('/admin/logs',{method:'DELETE',body:JSON.stringify({all:true})});showToast('Bütün loglar silindi!');fetchLogs(1)}catch(e){alert(e.message||'Xəta baş verdi')}}
     // ──────────────────────────────────────────────────────────
@@ -2292,9 +2303,8 @@
             <td><span class="role-badge role-CHAIR">${c.member_count || 0} üzv</span></td>
             <td style="text-align:right;">
               <div class="action-btn-group" style="justify-content:flex-end;">
-                <button class="btn-action" onclick="openEditClubModal(${c.id})">
-                  <i class="fa-solid fa-pen"></i> Redaktə
-                </button>
+                <button class="btn-action" onclick="openClubInfo(${c.id})"><i class="fa-solid fa-circle-info"></i> Info</button>
+                <button class="btn-action" onclick="openEditClubModal(${c.id})"><i class="fa-solid fa-pen"></i> Redaktə</button>
                 ${currentUser && currentUser.role === 'SUPER_ADMIN' ? `<button class="btn-action btn-action-danger" onclick="deleteClub(${c.id}, '${esc(c.name).replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i> Sil</button>` : ''}
               </div>
             </td>
@@ -2303,6 +2313,15 @@
       } catch (err) {
         console.error('Clubs error:', err);
       }
+    }
+
+    async function openClubInfo(id){
+      openModal('modalClubInfo');document.getElementById('clubInfoMembers').innerHTML='Yüklənir...';document.getElementById('clubLeadershipCards').innerHTML='';
+      try{const d=await api('/admin/clubs?details=1&id='+id),ms=d.members||[];document.getElementById('clubInfoTitle').textContent=d.club.name;document.getElementById('clubInfoMeta').textContent=ms.length+' üzv';
+        const leaders=ms.filter(x=>x.role==='CHAIR'||x.role==='VICE_CHAIR');
+        document.getElementById('clubLeadershipCards').innerHTML='<div class="club-admin-leaders">'+['CHAIR','VICE_CHAIR'].map(role=>{const x=leaders.find(a=>a.role===role);return '<div class="club-admin-leader"><small>'+(role==='CHAIR'?'KLUB SƏDRİ':'SƏDR MÜAVİNİ')+'</small>'+(x?'<b>'+esc(x.full_name)+'</b><span>'+esc(x.group_no||'Qrup yoxdur')+'</span><button class="btn-action" onclick="closeModal(\'modalClubInfo\');openEditMemberModal('+x.id+')">İdarə et</button>':'<b>Təyin edilməyib</b><span>Üzvlərdən birinə bu rolu verin</span>')+'</div>'}).join('')+'</div>';
+        document.getElementById('clubInfoMembers').innerHTML=ms.length?ms.map((x,i)=>'<div class="club-roster-row"><span class="club-roster-no">'+(i+1)+'</span><div class="attendee-admin-avatar">'+(x.photo_url?'<img src="'+esc(x.photo_url)+'">':esc((x.full_name||'?')[0]))+'</div><div class="club-roster-person"><b>'+esc(x.full_name)+'</b><small>'+esc(x.member_code)+' • '+esc(x.group_no||'Qrup yoxdur')+(x.faculty?' • '+esc(x.faculty):'')+'</small></div><span class="role-badge role-'+x.role+'">'+roleLabel(x.role)+'</span><button class="btn-action" onclick="closeModal(\'modalClubInfo\');openEditMemberModal('+x.id+')"><i class="fa-solid fa-pen"></i></button></div>').join(''):'<div class="empty-admin-state">Bu klubda üzv yoxdur.</div>';
+      }catch(e){document.getElementById('clubInfoMembers').innerHTML='<div class="empty-admin-state">'+esc(e.message||'Xəta')+'</div>'}
     }
 
     async function deleteClub(id, name) {
