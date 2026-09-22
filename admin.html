@@ -1626,6 +1626,19 @@
             </div>
           </div>
           <div class="form-group">
+            <label for="newsCoverFile">Xəbər Şəkli</label>
+            <input id="newsCoverFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none">
+            <label for="newsCoverFile" id="newsCoverPicker" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px;border:2px dashed #b9c9df;border-radius:14px;background:#f7faff;color:#315b8f;font-weight:700;cursor:pointer;transition:.2s;">
+              <i class="fa-solid fa-image"></i><span id="newsCoverPickerText">Xəbər üçün şəkil seç</span>
+            </label>
+            <input id="newsCoverUrl" name="coverUrl" type="hidden">
+            <div id="newsCoverPreviewWrap" style="display:none;margin-top:10px;">
+              <img id="newsCoverPreview" alt="Xəbər şəkli" style="width:100%;max-height:220px;object-fit:cover;border-radius:14px;border:1px solid var(--admin-border);">
+              <button type="button" class="btn-action" onclick="removeNewsCover()" style="margin-top:8px;">Şəkli sil</button>
+            </div>
+            <small style="color:var(--admin-muted);">Şəkil Cloudinary-də saxlanılır; database-də yalnız URL qalır.</small>
+          </div>
+          <div class="form-group">
             <label for="newsSummary">Qısa Xülasə</label>
             <textarea id="newsSummary" name="summary" rows="3" placeholder="Xəbərin qısa mətni"></textarea>
           </div>
@@ -2300,6 +2313,9 @@
       document.getElementById('modalNewsTitle').textContent = 'Xəbər Əlavə Et';
       document.getElementById('formNews').reset();
       document.getElementById('newsId').value = '';
+      document.getElementById('newsCoverUrl').value = '';
+      setNewsCoverPreview('');
+      document.getElementById('newsCoverPickerText').textContent = 'Xəbər üçün şəkil seç';
       openModal('modalNews');
     }
 
@@ -2313,17 +2329,44 @@
       document.getElementById('newsPublished').value = n.published ? 'true' : 'false';
       document.getElementById('newsSummary').value = n.summary || '';
       document.getElementById('newsContent').value = n.content || '';
+      document.getElementById('newsCoverUrl').value = n.cover_url || '';
+      setNewsCoverPreview(n.cover_url || '');
+      document.getElementById('newsCoverPickerText').textContent = n.cover_url ? 'Şəkli dəyiş' : 'Xəbər üçün şəkil seç';
       openModal('modalNews');
     }
+
+    function setNewsCoverPreview(url) {
+      const wrap = document.getElementById('newsCoverPreviewWrap');
+      const img = document.getElementById('newsCoverPreview');
+      if (url) { img.src = url; wrap.style.display = 'block'; }
+      else { img.removeAttribute('src'); wrap.style.display = 'none'; }
+    }
+    function removeNewsCover() {
+      document.getElementById('newsCoverUrl').value = '';
+      document.getElementById('newsCoverFile').value = '';
+      document.getElementById('newsCoverPickerText').textContent = 'Xəbər üçün şəkil seç';
+      setNewsCoverPreview('');
+    }
+    document.getElementById('newsCoverFile').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        setNewsCoverPreview(URL.createObjectURL(file));
+        document.getElementById('newsCoverPickerText').textContent = file.name;
+      }
+    });
 
     document.getElementById('formNews').onsubmit = async (e) => {
       e.preventDefault();
       const form = e.target;
       const data = Object.fromEntries(new FormData(form).entries());
+      delete data.newsCoverFile;
       const isEdit = !!data.id;
       data.published = data.published === 'true';
 
       try {
+        const coverFile = document.getElementById('newsCoverFile').files[0];
+        if (coverFile) data.coverUrl = await uploadClubLogo(coverFile);
+        else data.coverUrl = document.getElementById('newsCoverUrl').value;
         await api('/admin/news', {
           method: isEdit ? 'PATCH' : 'POST',
           body: JSON.stringify(data)
