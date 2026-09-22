@@ -50,7 +50,7 @@ module.exports = async (req, res) => {
     const user = await requirePermission(req, res, 'create_member');
     if (!user) return;
 
-    const { fullName, groupNo, faculty, clubId, role, positionInClub } = req.body || {};
+    const { fullName, groupNo, faculty, clubId, positionInClub } = req.body || {};
 
     if (!fullName || typeof fullName !== 'string' || fullName.trim().length < 2) {
       return res.status(400).json({ error: 'Ad Soyad tələb olunur.' });
@@ -64,14 +64,9 @@ module.exports = async (req, res) => {
       return user.club_id; // CHAIR öz klubunu məcbur olaraq seçir
     })();
 
-    // CHAIR SUPER_ADMIN/ADMIN rolu verə bilməz
-    const safeRole = (() => {
-      if (user.role === 'SUPER_ADMIN') return role || 'MEMBER';
-      if (user.role === 'ADMIN') {
-        return ['MEMBER', 'VICE_CHAIR', 'CHAIR', 'ADMIN'].includes(role) ? role : 'MEMBER';
-      }
-      return 'MEMBER'; // CHAIR yalnız MEMBER yarada bilər
-    })();
+    // Yeni hesab həmişə standart üzv kimi yaranır.
+    // Klub sədri/müavini klub idarəsindən, admin səlahiyyəti isə ayrıca təhlükəsizlik axınından verilir.
+    const safeRole = 'MEMBER';
 
     try {
       const memberCode = await generateMemberCode();
