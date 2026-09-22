@@ -36,3 +36,16 @@
 .club-link-card .leader b{color:var(--club-deep)}
 .club-link-card .avatar{background:rgba(var(--club-rgb),.16);border-color:rgba(var(--club-rgb),.28);color:var(--club-deep)}
 .club-link-card .meta{color:color-mix(in srgb,var(--club-deep) 72%,#7b8799)}
+
+/* Restore original visual style on Clubs listing */
+#grid .club-link-card{--club-rgb:23,79,174!important;--club-deep:#174fae!important;background:#fff!important;border-color:var(--line)!important;box-shadow:0 10px 30px rgba(10,36,83,.06)!important}
+#grid .club-link-card:before{display:none!important}
+#grid .club-link-card:hover{transform:translateY(-5px);box-shadow:0 18px 45px rgba(10,36,83,.13)!important;border-color:#bfd4ef!important}
+#grid .club-link-card .club-icon{width:58px;height:58px;border-radius:16px;padding:0;background:#e9f2ff;border:0;box-shadow:none}
+#grid .club-link-card .club-icon img{width:100%;height:100%;object-fit:contain}
+#grid .club-link-card h3{color:var(--text)}
+#grid .club-link-card .tag{display:inline-block;background:#eaf3ff;color:#1550a5;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:800}
+#grid .club-link-card .leader{border-top-color:var(--line)}
+#grid .club-link-card .leader b{color:inherit}
+#grid .club-link-card .avatar{width:42px;height:42px;border-radius:50%;background:#dfe9f8;border:0;color:var(--blue)}
+#grid .club-link-card .meta{color:var(--muted)}
