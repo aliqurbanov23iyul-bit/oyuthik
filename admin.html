@@ -1577,7 +1577,11 @@
           </div>
           <div class="form-group">
             <label for="clubLogoFile">Klub Logosu</label>
-            <input id="clubLogoFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+            <input id="clubLogoFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none">
+            <label for="clubLogoFile" id="clubLogoPicker" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px;border:2px dashed #b9c9df;border-radius:14px;background:#f7faff;color:#315b8f;font-weight:700;cursor:pointer;transition:.2s;">
+              <i class="fa-solid fa-cloud-arrow-up" style="font-size:20px;"></i>
+              <span id="clubLogoPickerText">Logo seç və ya dəyiş</span>
+            </label>
             <input id="clubLogoUrl" name="logoUrl" type="hidden">
             <div id="clubLogoPreviewWrap" style="display:none;margin-top:10px;align-items:center;gap:12px;">
               <img id="clubLogoPreview" alt="Klub logosu" style="width:72px;height:72px;object-fit:contain;border-radius:14px;border:1px solid var(--admin-border);background:#fff;padding:5px;">
@@ -2210,8 +2214,14 @@
     }
     document.getElementById('clubLogoFile').addEventListener('change', (e) => {
       const file = e.target.files && e.target.files[0];
-      if (file) setClubLogoPreview(URL.createObjectURL(file));
+      if (file) {
+        setClubLogoPreview(URL.createObjectURL(file));
+        document.getElementById('clubLogoPickerText').textContent = file.name;
+      }
     });
+    const logoPicker = document.getElementById('clubLogoPicker');
+    logoPicker.addEventListener('mouseenter', () => { logoPicker.style.background='#edf5ff'; logoPicker.style.borderColor='#5d8fd0'; logoPicker.style.transform='translateY(-1px)'; });
+    logoPicker.addEventListener('mouseleave', () => { logoPicker.style.background='#f7faff'; logoPicker.style.borderColor='#b9c9df'; logoPicker.style.transform='none'; });
     async function uploadClubLogo(file) {
       const fd = new FormData();
       fd.append('file', file);
