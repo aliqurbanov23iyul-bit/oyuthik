@@ -172,6 +172,16 @@ async function getAdminSession(req) {
       acc[p.permission_key] = p.club_scope_id;
       return acc;
     }, {});
+
+    // Rol presetləri: klub rəhbəri təyin edilən kimi əsas klub idarəetmə imkanları işləməlidir.
+    // DB permission-ları əlavə özəlləşdirmə üçündür; bu presetlər rolun minimum hüquqlarıdır.
+    if ((user.role === 'CHAIR' || user.role === 'VICE_CHAIR') && user.club_id) {
+      const roleDefaults = ['manage_club','view_members','create_member','edit_member','create_news','edit_news','create_event','edit_event'];
+      for (const key of roleDefaults) {
+        if (!user.permissions.includes(key)) user.permissions.push(key);
+        if (user.permissionScopes[key] === undefined) user.permissionScopes[key] = user.club_id;
+      }
+    }
   }
 
   return user;
