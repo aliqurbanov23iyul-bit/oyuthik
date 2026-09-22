@@ -742,6 +742,21 @@
       gap: 16px;
     }
 
+    /* Modal forms: header/footer stay fixed, only content scrolls */
+    .admin-modal { overflow: hidden; }
+    .admin-modal-card { overflow: hidden; }
+    .admin-modal-card form { min-height: 0; display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+    .admin-modal-card .modal-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+    .admin-modal-card .modal-head, .admin-modal-card .modal-foot { flex-shrink: 0; }
+    @media (max-width: 640px) {
+      .admin-modal { padding: 10px; align-items: center; }
+      .admin-modal-card { max-height: calc(100dvh - 20px); border-radius: 18px; }
+      .modal-head { padding: 16px 18px; }
+      .modal-body { padding: 18px; }
+      .modal-foot { padding: 14px 18px; }
+      .form-grid-2 { grid-template-columns: 1fr; }
+    }
+
     /* Code Success Modal */
     .code-success-box {
       text-align: center;
