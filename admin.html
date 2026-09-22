@@ -2303,7 +2303,7 @@
             <td><span class="role-badge role-CHAIR">${c.member_count || 0} üzv</span></td>
             <td style="text-align:right;">
               <div class="action-btn-group" style="justify-content:flex-end;">
-                <button class="btn-action" onclick="openClubInfo(${c.id})"><i class="fa-solid fa-circle-info"></i> Info</button>
+                <button class="btn-action" onclick="window.open('admin-club.html?id=${c.id}','_blank')"><i class="fa-solid fa-circle-info"></i> Info</button>
                 <button class="btn-action" onclick="openEditClubModal(${c.id})"><i class="fa-solid fa-pen"></i> Redaktə</button>
                 ${currentUser && currentUser.role === 'SUPER_ADMIN' ? `<button class="btn-action btn-action-danger" onclick="deleteClub(${c.id}, '${esc(c.name).replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i> Sil</button>` : ''}
               </div>
