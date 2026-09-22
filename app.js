@@ -211,3 +211,24 @@ document.addEventListener('DOMContentLoaded',()=>{
   const obs=new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType===1)translateDynamicRoot(n)})));
   obs.observe(document.body,{childList:true,subtree:true});
 });
+
+/* Shared member navigation for every public page */
+async function syncPublicMemberNav(){
+  const hosts=[...document.querySelectorAll('.public-member-nav')];
+  if(!hosts.length)return;
+  try{
+    const d=await api('/auth/me?type=member');
+    const u=d&&d.user;if(!u)return;
+    const name=u.fullName||'Üzv';
+    const position=u.positionInClub||roleLabel(u.role);
+    const canManage=['SUPER_ADMIN','ADMIN','CHAIR'].includes(u.role);
+    hosts.forEach((host,idx)=>{
+      host.innerHTML='<div class="member-menu-wrap"><button class="member-chip shared-member-chip" type="button"><i class="fa-solid fa-user"></i><span>'+esc(name)+'</span><i class="fa-solid fa-chevron-down"></i></button><div class="member-dropdown shared-member-dropdown"><div class="member-head"><div class="member-avatar">'+esc(name[0]||'?')+'</div><div><b>'+esc(name)+'</b><small>'+esc(position)+'</small></div></div><div class="member-info"><span><i class="fa-solid fa-building-columns"></i>'+esc(u.clubName||'Klub qeyd edilməyib')+'</span><span><i class="fa-solid fa-graduation-cap"></i>'+esc(u.faculty||'Fakültə qeyd edilməyib')+'</span><span><i class="fa-solid fa-users"></i>'+esc(u.groupNo||'Qrup qeyd edilməyib')+'</span></div>'+(canManage?'<a class="member-action" href="admin.html"><i class="fa-solid fa-sliders"></i> İdarə paneli</a>':'')+'<button class="member-action logout shared-member-logout"><i class="fa-solid fa-right-from-bracket"></i> Çıxış</button></div></div>';
+      const chip=host.querySelector('.shared-member-chip'),drop=host.querySelector('.shared-member-dropdown');
+      chip.onclick=e=>{e.stopPropagation();document.querySelectorAll('.shared-member-dropdown.open').forEach(x=>{if(x!==drop)x.classList.remove('open')});drop.classList.toggle('open')};
+      host.querySelector('.shared-member-logout').onclick=async()=>{try{await api('/auth/logout?type=member',{method:'POST'})}catch(e){}location.reload()};
+    });
+  }catch(e){}
+}
+document.addEventListener('click',()=>document.querySelectorAll('.shared-member-dropdown.open').forEach(x=>x.classList.remove('open')));
+document.addEventListener('DOMContentLoaded',syncPublicMemberNav);
