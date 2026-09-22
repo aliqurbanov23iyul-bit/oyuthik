@@ -16,6 +16,14 @@ module.exports = async (req, res) => {
 
     try {
       const sql = db();
+      if (req.query && req.query.attendees && req.query.id) {
+        const eventId = parseInt(req.query.id);
+        const ev = await sql`SELECT id, club_id FROM events WHERE id=${eventId} LIMIT 1`;
+        if (!ev[0]) return res.status(404).json({ error:'Tədbir tapılmadı.' });
+        if (!['SUPER_ADMIN','ADMIN'].includes(user.role) && ev[0].club_id !== user.club_id) return res.status(403).json({ error:'Bu tədbirin iştirakçılarını görməyə icazəniz yoxdur.' });
+        const attendees = await sql`SELECT u.id,u.full_name,u.member_code,u.group_no,u.faculty,u.photo_url,c.name club_name,a.status FROM event_attendance a JOIN users u ON u.id=a.user_id LEFT JOIN clubs c ON c.id=u.club_id WHERE a.event_id=${eventId} AND a.status='GOING' ORDER BY u.full_name`;
+        return res.status(200).json({ attendees, count:attendees.length });
+      }
       const isSuperOrAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(user.role);
       const events = isSuperOrAdmin
         ? await sql`
