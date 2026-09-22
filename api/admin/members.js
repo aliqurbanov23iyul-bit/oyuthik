@@ -68,7 +68,7 @@ module.exports = async (req, res) => {
     const safeRole = (() => {
       if (user.role === 'SUPER_ADMIN') return role || 'MEMBER';
       if (user.role === 'ADMIN') {
-        return ['MEMBER', 'CHAIR', 'ADMIN'].includes(role) ? role : 'MEMBER';
+        return ['MEMBER', 'VICE_CHAIR', 'CHAIR', 'ADMIN'].includes(role) ? role : 'MEMBER';
       }
       return 'MEMBER'; // CHAIR yalnız MEMBER yarada bilər
     })();
@@ -127,8 +127,8 @@ module.exports = async (req, res) => {
       }
       let safeRole = undefined;
       if (role !== undefined) {
-        if (user.role === 'SUPER_ADMIN') safeRole = ['SUPER_ADMIN','ADMIN','CHAIR','MEMBER'].includes(role) ? role : undefined;
-        else if (user.role === 'ADMIN') safeRole = ['ADMIN','CHAIR','MEMBER'].includes(role) ? role : undefined;
+        if (user.role === 'SUPER_ADMIN') safeRole = ['SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR','MEMBER'].includes(role) ? role : undefined;
+        else if (user.role === 'ADMIN') safeRole = ['ADMIN','CHAIR','VICE_CHAIR','MEMBER'].includes(role) ? role : undefined;
       }
       const safeClubId = ['SUPER_ADMIN','ADMIN'].includes(user.role) && clubId !== undefined ? (clubId ? parseInt(clubId) : null) : undefined;
 
