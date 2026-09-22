@@ -176,9 +176,8 @@ function getSiteLang(){ const l=localStorage.getItem('oyu_lang')||'az'; return S
 function translateText(s,lang=getSiteLang()){ if(lang==='az') return s; return (UI_TRANSLATIONS[lang]&&UI_TRANSLATIONS[lang][s])||s; }
 function setSiteLang(lang){ if(!SITE_LANGS.includes(lang)) return; localStorage.setItem('oyu_lang',lang); location.reload(); }
 function addLanguageSwitcher(){
-  if(location.pathname.endsWith('/admin.html') || location.pathname.endsWith('/chair.html')) return;
   const lang=getSiteLang(); document.documentElement.lang=lang;
-  const host=document.querySelector('.navbar .nav') || document.querySelector('.login-wrap');
+  const host=document.querySelector('.navbar .nav') || document.querySelector('.topbar') || document.querySelector('.login-wrap') || document.querySelector('.admin-login-box') || document.querySelector('.admin-topbar') || document.querySelector('.topbar-inner') || document.querySelector('.dash-main') || document.body;
   if(!host || document.getElementById('siteLangSwitcher')) return;
   const el=document.createElement('div'); el.id='siteLangSwitcher'; el.className='site-lang-switcher';
   el.innerHTML=SITE_LANGS.map(l=>'<button type="button" class="'+(l===lang?'active':'')+'" data-lang="'+l+'">'+l.toUpperCase()+'</button>').join('');
@@ -193,4 +192,15 @@ function applyStaticTranslations(){
   nodes.forEach(n=>{const raw=n.nodeValue,trim=raw.trim();if(dict[trim]) n.nodeValue=raw.replace(trim,dict[trim]);});
   document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{if(dict[el.placeholder])el.placeholder=dict[el.placeholder];});
 }
-document.addEventListener('DOMContentLoaded',()=>{applyStaticTranslations();addLanguageSwitcher();});
+function translateDynamicRoot(root=document.body){
+  const lang=getSiteLang(); if(lang==='az'||!root)return;
+  const dict=UI_TRANSLATIONS[lang]||{};
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT); const nodes=[];
+  while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(n=>{const raw=n.nodeValue,trim=raw.trim();if(dict[trim])n.nodeValue=raw.replace(trim,dict[trim]);});
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  applyStaticTranslations(); addLanguageSwitcher();
+  const obs=new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType===1)translateDynamicRoot(n)})));
+  obs.observe(document.body,{childList:true,subtree:true});
+});
