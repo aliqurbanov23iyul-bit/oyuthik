@@ -150,3 +150,7 @@ ALTER TABLE clubs ADD COLUMN IF NOT EXISTS telegram_url TEXT;
 
 -- Event cover image support
 ALTER TABLE events ADD COLUMN IF NOT EXISTS cover_url TEXT;
+
+-- Vice chair role support
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;
+ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR','MEMBER'));
