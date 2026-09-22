@@ -68,11 +68,34 @@ module.exports = async (req, res) => {
     const user = await requirePermission(req, res, 'manage_clubs');
     if (!user) return;
 
-    const { id, name, description, logoUrl, instagramUrl, tiktokUrl, whatsappUrl, telegramUrl } = req.body || {};
+    const { id, name, description, logoUrl, instagramUrl, tiktokUrl, whatsappUrl, telegramUrl, leadershipAction, memberId } = req.body || {};
     if (!id) return res.status(400).json({ error: 'id tələb olunur.' });
 
     try {
       const sql = db();
+      if (leadershipAction) {
+        if (!['SUPER_ADMIN','ADMIN'].includes(user.role)) return res.status(403).json({error:'Klub rəhbərliyini yalnız Admin dəyişə bilər.'});
+        const clubId=parseInt(id), uid=parseInt(memberId);
+        if(!uid) return res.status(400).json({error:'Üzv seçilməyib.'});
+        const target=await sql`SELECT id,full_name,club_id,role FROM users WHERE id=${uid} AND active=true LIMIT 1`;
+        if(!target[0]) return res.status(404).json({error:'Üzv tapılmadı.'});
+        if(target[0].role==='SUPER_ADMIN') return res.status(400).json({error:'Baş Admin klub rəhbəri edilə bilməz.'});
+        if(leadershipAction==='CHAIR'){
+          await sql.transaction([
+            sql`UPDATE users SET role='MEMBER', position_in_club=NULL WHERE club_id=${clubId} AND role='CHAIR' AND id<>${uid}`,
+            sql`UPDATE users SET club_id=${clubId}, role='CHAIR', position_in_club='Klub sədri' WHERE id=${uid}`
+          ]);
+        } else if(leadershipAction==='VICE_CHAIR'){
+          await sql.transaction([
+            sql`UPDATE users SET role='MEMBER', position_in_club=NULL WHERE club_id=${clubId} AND role='VICE_CHAIR' AND id<>${uid}`,
+            sql`UPDATE users SET club_id=${clubId}, role='VICE_CHAIR', position_in_club='Sədr müavini' WHERE id=${uid}`
+          ]);
+        } else if(leadershipAction==='MEMBER'){
+          await sql`UPDATE users SET club_id=${clubId}, role='MEMBER', position_in_club=NULL WHERE id=${uid} AND role<>'SUPER_ADMIN'`;
+        } else return res.status(400).json({error:'Yanlış rəhbərlik əməliyyatı.'});
+        await logActivity(user, `Klub rəhbərliyini dəyişdi: ${target[0].full_name} → ${leadershipAction}`, {targetType:'club',targetId:clubId,targetName:target[0].full_name,ip});
+        return res.status(200).json({ok:true});
+      }
       await sql`
         UPDATE clubs
         SET name        = COALESCE(${name        || null}, name),
