@@ -678,6 +678,7 @@
       border-color: #fecaca;
     }
 
+    .club-workspace-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.club-workspace-card{background:#fff;border:1px solid var(--admin-border);border-radius:20px;padding:22px;margin-bottom:18px;box-shadow:0 4px 18px rgba(10,36,83,.03)}.club-workspace-card h2,.club-workspace-card h3{margin:0;color:var(--admin-navy)}.club-workspace-muted{color:var(--admin-muted);font-size:12px;margin:5px 0}.club-workspace-leaders{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}.club-workspace-leader{border:1px solid var(--admin-border);border-radius:16px;padding:16px;background:#f8fbff}.club-workspace-leader>small{color:var(--admin-royal);font-weight:900;letter-spacing:.6px}.club-workspace-person{display:flex;align-items:center;gap:11px;margin:12px 0}.club-workspace-avatar{width:46px;height:46px;border-radius:13px;background:#e8f1ff;color:#1550a5;display:grid;place-items:center;font-weight:900;overflow:hidden}.club-workspace-avatar img{width:100%;height:100%;object-fit:cover}.club-workspace-person b,.club-workspace-person span{display:block}.club-workspace-person span{color:var(--admin-muted);font-size:11px;margin-top:3px}.club-workspace-find{position:relative}.club-workspace-search{width:100%;max-width:370px;padding:11px 13px;border:1px solid var(--admin-border);border-radius:11px;outline:none;font:inherit}.club-workspace-find .club-find-results{position:absolute;top:43px;left:0;right:0;background:#fff;border:1px solid var(--admin-border);border-radius:11px;box-shadow:0 12px 30px rgba(0,0,0,.14);z-index:20;max-height:230px;overflow:auto}.club-find-item{padding:10px;cursor:pointer;border-bottom:1px solid #edf1f6}.club-find-item:hover{background:#eef5ff}.club-workspace-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:12px}.club-workspace-row{display:flex;align-items:center;gap:11px;padding:12px 2px;border-bottom:1px solid var(--admin-border)}.club-workspace-main{flex:1}.club-workspace-main b,.club-workspace-main small{display:block}.club-workspace-main small{color:var(--admin-muted);margin-top:3px}.club-dots-wrap{position:relative}.club-dots-menu{display:none;position:absolute;right:0;top:38px;background:#fff;width:180px;padding:5px;border:1px solid var(--admin-border);border-radius:11px;box-shadow:0 10px 28px rgba(0,0,0,.14);z-index:15}.club-dots-menu.open{display:block}.club-dots-menu button{display:block;width:100%;border:0;background:none;text-align:left;padding:9px;border-radius:7px;font-weight:700;cursor:pointer}.club-dots-menu button:hover{background:#eef5ff}@media(max-width:700px){.club-workspace-leaders{grid-template-columns:1fr}.club-workspace-head{align-items:stretch;flex-direction:column}.club-workspace-search{max-width:none}}
     /* Modal Styles */
     .admin-modal {
       position: fixed;
@@ -1212,6 +1213,21 @@
                 </tbody>
               </table>
             </div>
+          </div>
+        </section>
+
+        <section class="panel-view" id="panel-clubWorkspace">
+          <div class="club-workspace-toolbar">
+            <button class="btn-action" onclick="switchTab('clubs')"><i class="fa-solid fa-arrow-left"></i> Klublara qayıt</button>
+            <span id="clubWorkspaceCount"></span>
+          </div>
+          <div class="club-workspace-card">
+            <h2 id="clubWorkspaceName">Klub</h2><p class="club-workspace-muted">Rəhbərlik və üzvləri bir yerdən idarə edin.</p>
+            <div class="club-workspace-leaders" id="clubWorkspaceLeaders"></div>
+          </div>
+          <div class="club-workspace-card">
+            <div class="club-workspace-head"><div><h3>Klub üzvləri</h3><p class="club-workspace-muted">Sədr, sədr müavini və bütün üzvlər</p></div><input id="clubWorkspaceFilter" class="club-workspace-search" placeholder="Ad, THIK kodu və ya qrup ilə axtar..."></div>
+            <div id="clubWorkspaceMembers"></div>
           </div>
         </section>
 
@@ -2303,7 +2319,7 @@
             <td><span class="role-badge role-CHAIR">${c.member_count || 0} üzv</span></td>
             <td style="text-align:right;">
               <div class="action-btn-group" style="justify-content:flex-end;">
-                <button class="btn-action" onclick="window.open('admin-club.html?id=${c.id}','_blank')"><i class="fa-solid fa-circle-info"></i> Info</button>
+                <button class="btn-action" onclick="openClubWorkspace(${c.id})"><i class="fa-solid fa-circle-info"></i> Info</button>
                 <button class="btn-action" onclick="openEditClubModal(${c.id})"><i class="fa-solid fa-pen"></i> Redaktə</button>
                 ${currentUser && currentUser.role === 'SUPER_ADMIN' ? `<button class="btn-action btn-action-danger" onclick="deleteClub(${c.id}, '${esc(c.name).replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i> Sil</button>` : ''}
               </div>
