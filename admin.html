@@ -2010,6 +2010,11 @@
               <button class="btn-action btn-action-danger" onclick="deleteMember(${m.id}, '${esc(m.full_name)}')" title="Deaktiv et">
                 <i class="fa-solid fa-user-slash"></i>
               </button>
+              ${currentUser.role === 'SUPER_ADMIN' && m.role !== 'SUPER_ADMIN' ? `
+                <button class="btn-action btn-action-danger" onclick="permanentDeleteMember(${m.id}, '${esc(m.full_name)}')" title="Tam sil">
+                  <i class="fa-solid fa-trash"></i> Sil
+                </button>
+              ` : ''}
             </div>
           </td>
         </tr>
@@ -2109,6 +2114,21 @@
         });
         showToast('Üzv deaktiv edildi!');
         await loadMembers();
+      } catch (err) {
+        alert(err.message || 'Xəta baş verdi');
+      }
+    }
+
+    async function permanentDeleteMember(id, name) {
+      if (!confirm(`"${name}" adlı üzv TAMAMİLƏ silinəcək. Bu əməliyyatı geri qaytarmaq mümkün deyil. Davam edilsin?`)) return;
+      try {
+        await api('/admin/members', {
+          method: 'DELETE',
+          body: JSON.stringify({ id, permanent: true })
+        });
+        showToast('Üzv tamamilə silindi!');
+        await loadMembers();
+        await loadOverview();
       } catch (err) {
         alert(err.message || 'Xəta baş verdi');
       }
