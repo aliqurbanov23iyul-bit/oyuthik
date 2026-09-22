@@ -136,3 +136,61 @@ function showToast(msg, type = 'success') {
   clearTimeout(el._t);
   el._t = setTimeout(() => { el.style.opacity = '0'; }, 3500);
 }
+
+
+/* Public site language support: AZ / EN / RU */
+const SITE_LANGS = ['az','en','ru'];
+const UI_TRANSLATIONS = {
+  en: {
+    'Haqqımızda':'About','Klublar':'Clubs','Xəbərlər':'News','Tədbirlər':'Events','Rəhbərlik':'Leadership','Giriş et':'Log in','Giriş et →':'Log in →',
+    'Tələbə Həmkarlar İttifaqı Komitəsi':'Student Trade Union Committee','Bakı, Azərbaycan':'Baku, Azerbaijan',
+    'Tələbə həyatını birlikdə daha güclü edirik.':'Together, we make student life stronger.',
+    'OYU THİK tələbələrin sosial, mədəni və akademik həyatında aktiv iştirakını dəstəkləyən tələbə platformasıdır. Klubları kəşf et, tədbirlərə qatıl və universitet həyatının bir parçası ol.':'OYU THİK is a student platform supporting active participation in social, cultural and academic life. Discover clubs, join events and become part of university life.',
+    'Klubları kəşf et':'Discover clubs','THİK haqqında':'About THİK','2021-dən tələbələrin yanında':'Supporting students since 2021',
+    'Aktiv klub':'Active clubs','THİK üzvü':'THİK members','Tədbir':'Events','Xəbər və paylaşım':'News and posts','YENİLİKLƏR':'UPDATES','Son xəbərlər':'Latest news',
+    'THİK və klubların son fəaliyyətləri.':'Latest activities from THİK and clubs.','Hamısına bax →':'View all →','TƏLƏBƏ HƏYATI':'STUDENT LIFE','Klublarımız':'Our clubs',
+    'Maraq dairənə uyğun icmanı tap.':'Find a community that matches your interests.','Bütün klublar →':'All clubs →','OYU THİK ÜZVÜSƏN?':'ARE YOU AN OYU THİK MEMBER?',
+    'Şəxsi kabinetinə daxil ol':'Log in to your account','Kabinetə giriş →':'Account login →','Keçidlər':'Links','Əlaqə':'Contact','Bütün hüquqlar qorunur.':'All rights reserved.',
+    'İCMALAR':'COMMUNITIES','Maraq dairənə uyğun klubu kəşf et.':'Discover a club matching your interests.','Xəbərlər və fəaliyyətlər':'News and activities',
+    'Qarşıdan gələn və keçirilmiş tədbirlər.':'Upcoming and past events.','İdarəetmə şurası':'Management board','OYU THİK rəhbərliyi və klub sədrləri.':'OYU THİK leadership and club chairs.',
+    'Məqsədimiz':'Our goal','Missiyamız':'Our mission','İcmamız':'Our community','Kabinetə giriş':'Account login','Üzv kabineti':'Member account','Üzv kodu':'Member code','Daxil ol':'Log in','Ana səhifəyə qayıt':'Back to home',
+    'Klub sədri':'Club chair','Sədr təyin edilməyib':'Chair not assigned','üzv':'members'
+  },
+  ru: {
+    'Haqqımızda':'О нас','Klublar':'Клубы','Xəbərlər':'Новости','Tədbirlər':'Мероприятия','Rəhbərlik':'Руководство','Giriş et':'Войти','Giriş et →':'Войти →',
+    'Tələbə Həmkarlar İttifaqı Komitəsi':'Студенческий профсоюзный комитет','Bakı, Azərbaycan':'Баку, Азербайджан',
+    'Tələbə həyatını birlikdə daha güclü edirik.':'Вместе мы делаем студенческую жизнь ярче.',
+    'OYU THİK tələbələrin sosial, mədəni və akademik həyatında aktiv iştirakını dəstəkləyən tələbə platformasıdır. Klubları kəşf et, tədbirlərə qatıl və universitet həyatının bir parçası ol.':'OYU THİK — студенческая платформа, поддерживающая активное участие в социальной, культурной и академической жизни. Открывайте клубы, участвуйте в мероприятиях и станьте частью университетской жизни.',
+    'Klubları kəşf et':'Открыть клубы','THİK haqqında':'О THİK','2021-dən tələbələrin yanında':'Вместе со студентами с 2021 года',
+    'Aktiv klub':'Активных клубов','THİK üzvü':'Участников THİK','Tədbir':'Мероприятий','Xəbər və paylaşım':'Новостей и публикаций','YENİLİKLƏR':'НОВОСТИ','Son xəbərlər':'Последние новости',
+    'THİK və klubların son fəaliyyətləri.':'Последние события THİK и клубов.','Hamısına bax →':'Смотреть все →','TƏLƏBƏ HƏYATI':'СТУДЕНЧЕСКАЯ ЖИЗНЬ','Klublarımız':'Наши клубы',
+    'Maraq dairənə uyğun icmanı tap.':'Найдите сообщество по своим интересам.','Bütün klublar →':'Все клубы →','OYU THİK ÜZVÜSƏN?':'ВЫ УЧАСТНИК OYU THİK?',
+    'Şəxsi kabinetinə daxil ol':'Войти в личный кабинет','Kabinetə giriş →':'Войти в кабинет →','Keçidlər':'Ссылки','Əlaqə':'Контакты','Bütün hüquqlar qorunur.':'Все права защищены.',
+    'İCMALAR':'СООБЩЕСТВА','Maraq dairənə uyğun klubu kəşf et.':'Найдите клуб по своим интересам.','Xəbərlər və fəaliyyətlər':'Новости и деятельность',
+    'Qarşıdan gələn və keçirilmiş tədbirlər.':'Предстоящие и прошедшие мероприятия.','İdarəetmə şurası':'Совет управления','OYU THİK rəhbərliyi və klub sədrləri.':'Руководство OYU THİK и председатели клубов.',
+    'Məqsədimiz':'Наша цель','Missiyamız':'Наша миссия','İcmamız':'Наше сообщество','Kabinetə giriş':'Вход в кабинет','Üzv kabineti':'Кабинет участника','Üzv kodu':'Код участника','Daxil ol':'Войти','Ana səhifəyə qayıt':'Вернуться на главную',
+    'Klub sədri':'Председатель клуба','Sədr təyin edilməyib':'Председатель не назначен','üzv':'участников'
+  }
+};
+function getSiteLang(){ const l=localStorage.getItem('oyu_lang')||'az'; return SITE_LANGS.includes(l)?l:'az'; }
+function translateText(s,lang=getSiteLang()){ if(lang==='az') return s; return (UI_TRANSLATIONS[lang]&&UI_TRANSLATIONS[lang][s])||s; }
+function setSiteLang(lang){ if(!SITE_LANGS.includes(lang)) return; localStorage.setItem('oyu_lang',lang); location.reload(); }
+function addLanguageSwitcher(){
+  if(location.pathname.endsWith('/admin.html') || location.pathname.endsWith('/chair.html')) return;
+  const lang=getSiteLang(); document.documentElement.lang=lang;
+  const host=document.querySelector('.navbar .nav') || document.querySelector('.login-wrap');
+  if(!host || document.getElementById('siteLangSwitcher')) return;
+  const el=document.createElement('div'); el.id='siteLangSwitcher'; el.className='site-lang-switcher';
+  el.innerHTML=SITE_LANGS.map(l=>'<button type="button" class="'+(l===lang?'active':'')+'" data-lang="'+l+'">'+l.toUpperCase()+'</button>').join('');
+  el.querySelectorAll('button').forEach(b=>b.onclick=()=>setSiteLang(b.dataset.lang));
+  host.appendChild(el);
+}
+function applyStaticTranslations(){
+  const lang=getSiteLang(); if(lang==='az') return;
+  const dict=UI_TRANSLATIONS[lang]||{};
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(n=>{const raw=n.nodeValue,trim=raw.trim();if(dict[trim]) n.nodeValue=raw.replace(trim,dict[trim]);});
+  document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{if(dict[el.placeholder])el.placeholder=dict[el.placeholder];});
+}
+document.addEventListener('DOMContentLoaded',()=>{applyStaticTranslations();addLanguageSwitcher();});
