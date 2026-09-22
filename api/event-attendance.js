@@ -9,7 +9,13 @@ module.exports = async (req,res) => {
   if(!eventId) return res.status(400).json({error:'Tədbir seçilməyib.'});
   const ev=await sql`SELECT id,title,event_date FROM events WHERE id=${eventId} LIMIT 1`;
   if(!ev[0]) return res.status(404).json({error:'Tədbir tapılmadı.'});
+  if(req.method==='GET'){
+    const rows=await sql`SELECT 1 FROM event_attendance WHERE event_id=${eventId} AND user_id=${user.id} AND status='GOING' LIMIT 1`;
+    return res.json({ok:true,joined:!!rows[0]});
+  }
   if(req.method==='POST'){
+    const existing=await sql`SELECT 1 FROM event_attendance WHERE event_id=${eventId} AND user_id=${user.id} AND status='GOING' LIMIT 1`;
+    if(existing[0]) return res.status(409).json({error:'Siz artıq bu tədbirə qatılmısınız.',joined:true});
     await sql`INSERT INTO event_attendance(event_id,user_id,status) VALUES(${eventId},${user.id},'GOING') ON CONFLICT(event_id,user_id) DO UPDATE SET status='GOING'`;
     return res.json({ok:true,joined:true});
   }
