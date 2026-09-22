@@ -1701,6 +1701,18 @@
             </select>
           </div>
           <div class="form-group">
+            <label for="eventCoverFile">Tədbir Şəkli</label>
+            <input id="eventCoverFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none">
+            <label for="eventCoverFile" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px;border:2px dashed #b9c9df;border-radius:14px;background:#f7faff;color:#315b8f;font-weight:700;cursor:pointer;">
+              <i class="fa-solid fa-image"></i><span id="eventCoverPickerText">Tədbir üçün şəkil seç</span>
+            </label>
+            <input id="eventCoverUrl" name="coverUrl" type="hidden">
+            <div id="eventCoverPreviewWrap" style="display:none;margin-top:10px;">
+              <img id="eventCoverPreview" alt="Tədbir şəkli" style="width:100%;max-height:220px;object-fit:cover;border-radius:14px;border:1px solid var(--admin-border);">
+              <button type="button" class="btn-action" onclick="removeEventCover()" style="margin-top:8px;">Şəkli sil</button>
+            </div>
+          </div>
+          <div class="form-group">
             <label for="eventDescription">Açıqlama</label>
             <textarea id="eventDescription" name="description" rows="4" placeholder="Tədbir haqqında ətraflı"></textarea>
           </div>
@@ -2448,6 +2460,9 @@
       document.getElementById('modalEventTitle').textContent = 'Tədbir Əlavə Et';
       document.getElementById('formEvent').reset();
       document.getElementById('eventId').value = '';
+      document.getElementById('eventCoverUrl').value = '';
+      document.getElementById('eventCoverPickerText').textContent = 'Tədbir üçün şəkil seç';
+      setEventCoverPreview('');
       if (currentUser.role === 'CHAIR' && currentUser.clubId) {
         document.getElementById('eventClub').value = currentUser.clubId;
       }
@@ -2463,19 +2478,42 @@
       document.getElementById('eventDate').value = ev.event_date ? new Date(ev.event_date).toISOString().slice(0, 16) : '';
       document.getElementById('eventLocation').value = ev.location || '';
       document.getElementById('eventDescription').value = ev.description || '';
+      document.getElementById('eventCoverUrl').value = ev.cover_url || '';
+      document.getElementById('eventCoverPickerText').textContent = ev.cover_url ? 'Şəkli dəyiş' : 'Tədbir üçün şəkil seç';
+      setEventCoverPreview(ev.cover_url || '');
       if (document.getElementById('eventClub')) {
         document.getElementById('eventClub').value = ev.club_id || '';
       }
       openModal('modalEvent');
     }
 
+    function setEventCoverPreview(url) {
+      const wrap = document.getElementById('eventCoverPreviewWrap');
+      const img = document.getElementById('eventCoverPreview');
+      if (url) { img.src=url; wrap.style.display='block'; } else { img.removeAttribute('src'); wrap.style.display='none'; }
+    }
+    function removeEventCover() {
+      document.getElementById('eventCoverUrl').value='';
+      document.getElementById('eventCoverFile').value='';
+      document.getElementById('eventCoverPickerText').textContent='Tədbir üçün şəkil seç';
+      setEventCoverPreview('');
+    }
+    document.getElementById('eventCoverFile').addEventListener('change', e => {
+      const file=e.target.files && e.target.files[0];
+      if(file){ setEventCoverPreview(URL.createObjectURL(file)); document.getElementById('eventCoverPickerText').textContent=file.name; }
+    });
+
     document.getElementById('formEvent').onsubmit = async (e) => {
       e.preventDefault();
       const form = e.target;
       const data = Object.fromEntries(new FormData(form).entries());
+      delete data.eventCoverFile;
       const isEdit = !!data.id;
 
       try {
+        const coverFile=document.getElementById('eventCoverFile').files[0];
+        if(coverFile) data.coverUrl=await uploadClubLogo(coverFile);
+        else data.coverUrl=document.getElementById('eventCoverUrl').value;
         await api('/admin/events', {
           method: isEdit ? 'PATCH' : 'POST',
           body: JSON.stringify(data)
