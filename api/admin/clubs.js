@@ -93,6 +93,25 @@ module.exports = async (req, res) => {
         } else if(leadershipAction==='MEMBER'){
           await sql`UPDATE users SET club_id=${clubId}, role='MEMBER', position_in_club=NULL WHERE id=${uid} AND role<>'SUPER_ADMIN'`;
         } else return res.status(400).json({error:'Yanlış rəhbərlik əməliyyatı.'});
+        // Rəhbərlik rolu veriləndə panel icazələrini də avtomatik sinxronlaşdır.
+        // Sədr öz klubunun üzvlərini idarə edə, üzv əlavə/redaktə edə, klub məlumatını və klub tədbir/xəbərlərini idarə edə bilər.
+        const chairPerms = ['manage_club','view_members','create_member','edit_member','create_news','edit_news','create_event','edit_event'];
+        const vicePerms  = ['manage_club','view_members','create_member','edit_member','create_news','edit_news','create_event','edit_event'];
+        if (leadershipAction === 'CHAIR' || leadershipAction === 'VICE_CHAIR') {
+          const defaults = leadershipAction === 'CHAIR' ? chairPerms : vicePerms;
+          for (const key of defaults) {
+            await sql`
+              INSERT INTO user_permissions(user_id, permission_key, club_scope_id)
+              VALUES(${uid}, ${key}, ${clubId})
+              ON CONFLICT(user_id, permission_key)
+              DO UPDATE SET club_scope_id = EXCLUDED.club_scope_id
+            `;
+          }
+        } else if (leadershipAction === 'MEMBER') {
+          await sql`DELETE FROM user_permissions WHERE user_id=${uid} AND club_scope_id=${clubId}`;
+          await sql`DELETE FROM admin_sessions WHERE user_id=${uid}`;
+        }
+
         await logActivity(user, `Klub rəhbərliyini dəyişdi: ${target[0].full_name} → ${leadershipAction}`, {targetType:'club',targetId:clubId,targetName:target[0].full_name,ip});
         return res.status(200).json({ok:true});
       }
