@@ -161,12 +161,22 @@ module.exports = async (req, res) => {
     try {
       const sql = db();
 
-      // Club scope yoxlaması
+      // Club scope + iyerarxiya yoxlaması
+      const targetForDelete = await sql`SELECT id, club_id, role, full_name FROM users WHERE id = ${parseInt(id)} LIMIT 1`;
+      if (!targetForDelete[0]) return res.status(404).json({ error: 'Üzv tapılmadı.' });
       if (!['SUPER_ADMIN', 'ADMIN'].includes(user.role)) {
-        const target = await sql`SELECT club_id FROM users WHERE id = ${parseInt(id)} LIMIT 1`;
-        if (!target[0] || target[0].club_id !== user.club_id) {
-          return res.status(403).json({ error: 'Bu üzvü silmək üçün icazəniz yoxdur.' });
+        if (targetForDelete[0].club_id !== user.club_id) {
+          return res.status(403).json({ error: 'Bu üzvü idarə etmək üçün icazəniz yoxdur.' });
         }
+        if (user.role !== 'CHAIR') {
+          return res.status(403).json({ error: 'Üzvü deaktiv etmək yalnız klub sədri üçün mümkündür.' });
+        }
+        if (targetForDelete[0].role !== 'MEMBER') {
+          return res.status(403).json({ error: 'Klub sədri rəhbərlik hesabını deaktiv edə bilməz.' });
+        }
+      }
+      if (user.role === 'ADMIN' && ['SUPER_ADMIN','ADMIN'].includes(targetForDelete[0].role)) {
+        return res.status(403).json({ error: 'İdarəçi başqa idarəçi hesabını deaktiv edə bilməz.' });
       }
 
       if (permanent) {
