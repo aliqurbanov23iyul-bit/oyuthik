@@ -107,18 +107,21 @@ module.exports = async (req, res) => {
       const rows = await sql`SELECT name FROM clubs WHERE id = ${clubId} LIMIT 1`;
       if (!rows[0]) return res.status(404).json({ error: 'Klub tapılmadı.' });
 
-      await sql.begin(async tx => {
-        await tx`UPDATE users SET club_id = NULL WHERE club_id = ${clubId}`;
-        await tx`UPDATE events SET club_id = NULL WHERE club_id = ${clubId}`;
-        await tx`DELETE FROM clubs WHERE id = ${clubId}`;
-      });
+      // @neondatabase/serverless neon() uses sql.transaction(), not sql.begin().
+      // Keep related rows valid and delete the club atomically.
+      await sql.transaction([
+        sql`UPDATE users SET club_id = NULL WHERE club_id = ${clubId}`,
+        sql`UPDATE events SET club_id = NULL WHERE club_id = ${clubId}`,
+        sql`DELETE FROM clubs WHERE id = ${clubId}`
+      ]);
 
       await logActivity(user, `Klubu sildi: ${rows[0].name}`, {
         targetType: 'club', targetId: clubId, targetName: rows[0].name, ip
       });
       return res.status(200).json({ ok: true });
     } catch (e) {
-      return res.status(500).json({ error: 'Klub silinərkən server xətası baş verdi.' });
+      console.error('Delete club error:', e);
+      return res.status(500).json({ error: 'Klub silinərkən server xətası baş verdi.', detail: process.env.NODE_ENV === 'development' ? e.message : undefined });
     }
   }
 
