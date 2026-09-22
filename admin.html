@@ -993,7 +993,7 @@
           <i class="fa-solid fa-calendar-days"></i> Tədbirlər
         </button>
 
-        <div class="nav-category" id="catAdmin">Təhlükəsizlik</div>
+        <div class="nav-category" id="catAdmin">Sistem</div>
         <button class="nav-btn" data-tab="permissions" id="navPermissions">
           <i class="fa-solid fa-shield-halved"></i> İcazələr (Permissions)
         </button>
@@ -1525,11 +1525,9 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="newMemRole">Üzvlük tipi</label>
-              <select id="newMemRole" name="role">
-                <option value="MEMBER">Standart üzv</option>
-              </select>
-              <small class="role-help">Rəhbərlik və admin səlahiyyətləri üzv yaradıldıqdan sonra uyğun idarəetmə bölməsindən verilir.</small>
+              <label>Hesab tipi</label>
+              <div class="notice-banner" style="margin:0;padding:12px 14px;"><i class="fa-solid fa-user"></i><div><b>Üzv</b><br><small>Yeni hesab standart üzv kimi yaradılır. Sədr və müavin Klub idarəsindən təyin olunur.</small></div></div>
+              <input type="hidden" id="newMemRole" name="role" value="MEMBER">
             </div>
           </div>
 
@@ -1595,7 +1593,7 @@
             </div>
           </div>
           <div class="form-grid-2">
-            <div class="form-group"><label for="editMemRole">Sistem rolu</label><select id="editMemRole" name="role" disabled><option value="MEMBER">Üzv</option><option value="VICE_CHAIR">Sədr Müavini</option><option value="CHAIR">Klub Sədri</option><option value="ADMIN">Administrator</option><option value="SUPER_ADMIN">Baş Administrator</option></select><small class="role-help">Rol burada dəyişdirilmir: klub rəhbərliyi “Klublar → Info”, admin səlahiyyəti isə “İdarəetmə Şurası” bölməsindən idarə olunur.</small></div>
+            <div class="form-group"><label>Rol</label><div class="notice-banner" style="margin:0;padding:12px 14px;"><i class="fa-solid fa-shield"></i><div><b id="editMemRoleText">Üzv</b><br><small>Rol bu pəncərədən dəyişmir. Klub rəhbərliyi “Klublar” bölməsindən idarə olunur.</small></div></div><input type="hidden" id="editMemRole" value="MEMBER"></div>
             <div class="form-group"><label for="editMemClub">Klub</label><select id="editMemClub" name="clubId"><option value="">THİK / Klubsuz</option></select></div>
           </div>
           <div class="form-group">
@@ -2010,6 +2008,21 @@
         document.getElementById('navLogs').style.display = 'none';
       }
 
+      // Sadə panel: texniki permission/şifrə/log bölmələri yalnız Baş Administrator üçündür.
+      // Digər rollar yalnız işlərinə aid bölmələri görür.
+      if (!isSuper) {
+        document.getElementById('navPermissions').style.display = 'none';
+        document.getElementById('navAdminCreds').style.display = 'none';
+        document.getElementById('navLogs').style.display = 'none';
+        document.getElementById('catAdmin').style.display = 'none';
+      }
+
+      // İdarəetmə Şurası bütün klub rəhbərlərinə lazım deyil.
+      // Klub sədri/müavini öz rəhbərliyini Klub bölməsində görür.
+      if (currentUser.role === 'CHAIR' || currentUser.role === 'VICE_CHAIR') {
+        document.getElementById('navBoard').style.display = 'none';
+      }
+
       if (!hasPerm('manage_permissions') && !hasPerm('manage_admins') && !hasPerm('view_activity_logs')) {
         document.getElementById('catAdmin').style.display = 'none';
       }
@@ -2159,9 +2172,10 @@
                   <i class="fa-solid fa-key"></i>
                 </button>
               ` : ''}
+              ${(currentUser.role === 'SUPER_ADMIN' || (currentUser.role === 'ADMIN' && !['SUPER_ADMIN','ADMIN'].includes(m.role)) || (currentUser.role === 'CHAIR' && m.role === 'MEMBER')) ? `
               <button class="btn-action btn-action-danger" onclick="deleteMember(${m.id}, '${esc(m.full_name)}')" title="Deaktiv et">
                 <i class="fa-solid fa-user-slash"></i>
-              </button>
+              </button>` : ''}
               ${currentUser.role === 'SUPER_ADMIN' && m.role !== 'SUPER_ADMIN' ? `
                 <button class="btn-action btn-action-danger" onclick="permanentDeleteMember(${m.id}, '${esc(m.full_name)}')" title="Tam sil">
                   <i class="fa-solid fa-trash"></i> Sil
@@ -2234,7 +2248,7 @@
       document.getElementById('editMemGroup').value = m.group_no || '';
       document.getElementById('editMemFaculty').value = m.faculty || '';
       document.getElementById('editMemPosition').value = m.position_in_club || '';
-      document.getElementById('editMemRole').value = m.role || 'MEMBER';
+      document.getElementById('editMemRole').value = m.role || 'MEMBER'; const rt=document.getElementById('editMemRoleText'); if(rt) rt.textContent=roleLabel(m.role || 'MEMBER');
       const clubSel=document.getElementById('editMemClub'); clubSel.innerHTML='<option value="">THİK / Klubsuz</option>'+allClubs.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join(''); clubSel.value=m.club_id||'';
       document.getElementById('editMemPhotoUrl').value=m.photo_url||''; setMemberPhotoPreview(m.photo_url||'');
       document.getElementById('editMemActive').value = m.active ? 'true' : 'false';
@@ -2348,7 +2362,7 @@
     async function openClubWorkspace(id){activeClubWorkspaceId=Number(id);document.querySelectorAll('.panel-view').forEach(p=>p.classList.remove('active'));document.getElementById('panel-clubWorkspace').classList.add('active');document.querySelectorAll('.nav-btn[data-tab]').forEach(b=>b.classList.remove('active'));const cb=document.querySelector('.nav-btn[data-tab="clubs"]');if(cb)cb.classList.add('active');document.getElementById('topbarTitle').textContent='Klub idarəsi';await loadClubWorkspace()}
     async function loadClubWorkspace(){try{const d=await api('/admin/clubs?details=1&id='+activeClubWorkspaceId);clubWorkspaceRoster=d.members||[];document.getElementById('clubWorkspaceName').textContent=d.club.name;document.getElementById('clubWorkspaceCount').textContent=clubWorkspaceRoster.length+' üzv';renderClubWorkspace()}catch(e){alert(e.message||'Klub məlumatları yüklənmədi')}}
     function renderClubWorkspace(){const leaders=document.getElementById('clubWorkspaceLeaders');leaders.innerHTML=['CHAIR','VICE_CHAIR'].map(role=>{const x=clubWorkspaceRoster.find(m=>m.role===role),label=role==='CHAIR'?'KLUB SƏDRİ':'SƏDR MÜAVİNİ';return '<div class="club-workspace-leader"><small>'+label+'</small><div class="club-workspace-person">'+clubWsAvatar(x)+'<div>'+(x?'<b>'+esc(x.full_name)+'</b><span>'+esc(x.group_no||'Qrup yoxdur')+'</span>':'<b>Təyin edilməyib</b><span>Aşağıdakı axtarışdan seçin</span>')+'</div></div><div class="club-workspace-find"><input class="club-workspace-search club-leader-search" data-role="'+role+'" placeholder="Ad Soyad yazın..."><div class="club-find-results" data-role-results="'+role+'" style="display:none"></div></div></div>'}).join('');bindClubLeaderSearch();renderClubWorkspaceMembers()}
-    function renderClubWorkspaceMembers(){const q=(document.getElementById('clubWorkspaceFilter').value||'').toLowerCase();const list=clubWorkspaceRoster.filter(x=>(x.full_name+' '+(x.member_code||'')+' '+(x.group_no||'')).toLowerCase().includes(q));document.getElementById('clubWorkspaceMembers').innerHTML=list.length?list.map((x,i)=>'<div class="club-workspace-row"><b style="width:24px;color:var(--admin-muted)">'+(i+1)+'</b>'+clubWsAvatar(x)+'<div class="club-workspace-main"><b>'+esc(x.full_name)+'</b><small>'+esc(x.member_code||'')+' • '+esc(x.group_no||'Qrup yoxdur')+(x.faculty?' • '+esc(x.faculty):'')+'</small></div><span class="role-badge role-'+x.role+'">'+roleLabel(x.role)+'</span><div class="club-dots-wrap"><button class="btn-action" onclick="toggleClubDots(event,this)">⋮</button><div class="club-dots-menu"><button onclick="setClubLeadership('+x.id+',\'CHAIR\')">Sədr et</button><button onclick="setClubLeadership('+x.id+',\'VICE_CHAIR\')">Sədr müavini et</button><button onclick="setClubLeadership('+x.id+',\'MEMBER\')">Üzv et</button><button onclick="openEditMemberModal('+x.id+')">Redaktə et</button></div></div></div>').join(''):'<div style="padding:25px;color:var(--admin-muted)">Üzv tapılmadı.</div>'}
+    function renderClubWorkspaceMembers(){const q=(document.getElementById('clubWorkspaceFilter').value||'').toLowerCase();const list=clubWorkspaceRoster.filter(x=>(x.full_name+' '+(x.member_code||'')+' '+(x.group_no||'')).toLowerCase().includes(q));document.getElementById('clubWorkspaceMembers').innerHTML=list.length?list.map((x,i)=>'<div class="club-workspace-row"><b style="width:24px;color:var(--admin-muted)">'+(i+1)+'</b>'+clubWsAvatar(x)+'<div class="club-workspace-main"><b>'+esc(x.full_name)+'</b><small>'+esc(x.member_code||'')+' • '+esc(x.group_no||'Qrup yoxdur')+(x.faculty?' • '+esc(x.faculty):'')+'</small></div><span class="role-badge role-'+x.role+'">'+roleLabel(x.role)+'</span><div class="club-dots-wrap"><button class="btn-action" onclick="toggleClubDots(event,this)">⋮</button><div class="club-dots-menu">'+(['SUPER_ADMIN','ADMIN'].includes(currentUser.role)?'<button onclick="setClubLeadership('+x.id+',\'CHAIR\')">Sədr et</button><button onclick="setClubLeadership('+x.id+',\'VICE_CHAIR\')">Sədr müavini et</button><button onclick="setClubLeadership('+x.id+',\'MEMBER\')">Üzv et</button>':'')+'<button onclick="openEditMemberModal('+x.id+')">Redaktə et</button></div></div></div>').join(''):'<div style="padding:25px;color:var(--admin-muted)">Üzv tapılmadı.</div>'}
     function toggleClubDots(e,b){e.stopPropagation();document.querySelectorAll('.club-dots-menu.open').forEach(x=>x!==b.nextElementSibling&&x.classList.remove('open'));b.nextElementSibling.classList.toggle('open')}
     document.addEventListener('click',()=>document.querySelectorAll('.club-dots-menu.open').forEach(x=>x.classList.remove('open')));
     async function setClubLeadership(uid,role){const msg=role==='CHAIR'?'Bu üzv klub sədri təyin edilsin? Mövcud sədr avtomatik üzv olacaq.':role==='VICE_CHAIR'?'Bu üzv sədr müavini təyin edilsin? Mövcud müavin avtomatik üzv olacaq.':'Bu şəxs adi üzv edilsin?';if(!confirm(msg))return;try{await api('/admin/clubs',{method:'PATCH',body:JSON.stringify({id:activeClubWorkspaceId,leadershipAction:role,memberId:uid})});showToast('Klub rəhbərliyi yeniləndi!');await loadMembers();await loadClubWorkspace()}catch(e){alert(e.message||'Xəta')}}
