@@ -7,9 +7,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 .news-page{background:#f4f8fd;min-height:100vh}
-.news-hero{position:relative;overflow:hidden;background:linear-gradient(90deg,rgba(4,27,62,.94) 0%,rgba(6,51,111,.80) 48%,rgba(13,86,170,.62) 100%),url('news-hero-bg.jpg') center/cover no-repeat;color:#fff;padding:76px 0 68px}
-.news-hero:before{content:"";position:absolute;width:440px;height:440px;border-radius:50%;border:90px solid rgba(255,255,255,.035);right:-80px;top:-180px;animation:newsFloat 9s ease-in-out infinite}
-.news-hero:after{content:"THİK";position:absolute;right:5%;bottom:-48px;font-size:180px;font-weight:900;color:rgba(255,255,255,.035);letter-spacing:-10px}
+.news-hero{position:relative;overflow:hidden;background:linear-gradient(90deg,rgba(4,27,62,.86) 0%,rgba(6,51,111,.67) 48%,rgba(13,86,170,.48) 100%),url('https://images.unsplash.com/photo-1564981797816-1043664bf78d?auto=format&fit=crop&w=2000&q=88') center 48%/cover no-repeat;color:#fff;padding:76px 0 68px}
+.news-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(2,22,52,.24),transparent 62%);pointer-events:none}
+.news-hero:after{content:"";display:none}
 @keyframes newsFloat{50%{transform:translate(-25px,25px) rotate(8deg)}}
 .news-hero-inner{position:relative;z-index:2;display:grid;grid-template-columns:1.2fr .8fr;gap:50px;align-items:end}
 .news-kicker{font-size:12px;font-weight:900;letter-spacing:3px;color:#75c4ff}
