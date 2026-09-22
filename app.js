@@ -237,24 +237,20 @@ document.addEventListener('DOMContentLoaded',syncPublicMemberNav);
 
 /* Shared mobile navigation */
 function initMobileNavigation(){
-  document.querySelectorAll('.navbar .nav').forEach(nav=>{
-    const links=nav.querySelector('.navlinks');
-    if(!links || nav.querySelector('.mobile-menu-btn')) return;
-    const btn=document.createElement('button');
-    btn.type='button';btn.className='mobile-menu-btn';
-    btn.setAttribute('aria-label','Menyunu aç');
-    btn.setAttribute('aria-expanded','false');
-    btn.innerHTML='<i class="fa-solid fa-bars" aria-hidden="true"></i><span style="font-size:20px;line-height:1">☰</span>';
-    const member=nav.querySelector('#memberNav,.public-member-nav');
-    nav.insertBefore(btn,member||null);
-    btn.addEventListener('click',e=>{
-      e.stopPropagation();
-      const open=links.classList.toggle('mobile-open');
-      btn.setAttribute('aria-expanded',String(open));
-      btn.querySelector('span').textContent=open?'×':'☰';
-    });
-    links.addEventListener('click',()=>{links.classList.remove('mobile-open');btn.setAttribute('aria-expanded','false');btn.querySelector('span').textContent='☰'});
-    document.addEventListener('click',e=>{if(!nav.contains(e.target)){links.classList.remove('mobile-open');btn.setAttribute('aria-expanded','false');btn.querySelector('span').textContent='☰'}});
-  });
+ document.querySelectorAll('.navbar .nav').forEach(nav=>{
+  const links=nav.querySelector('.navlinks');
+  if(!links)return;
+  let btn=nav.querySelector('.mobile-menu-btn');
+  if(!btn){
+   btn=document.createElement('button');
+   btn.type='button';btn.className='mobile-menu-btn';btn.setAttribute('aria-label','Menyu');btn.setAttribute('aria-expanded','false');
+   btn.innerHTML='<span>☰</span>';
+   nav.appendChild(btn);
+  }
+  const close=()=>{links.classList.remove('mobile-open');btn.setAttribute('aria-expanded','false');btn.querySelector('span').textContent='☰'};
+  btn.onclick=function(e){e.preventDefault();e.stopPropagation();const open=!links.classList.contains('mobile-open');close();if(open){links.classList.add('mobile-open');btn.setAttribute('aria-expanded','true');btn.querySelector('span').textContent='×'}};
+  links.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));
+  document.addEventListener('click',e=>{if(!nav.contains(e.target))close()});
+ });
 }
-if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initMobileNavigation); else initMobileNavigation();
+document.addEventListener('DOMContentLoaded',initMobileNavigation);
