@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
     const user = await requirePermission(req, res, 'manage_clubs');
     if (!user) return;
 
-    const { name, description } = req.body || {};
+    const { name, description, logoUrl } = req.body || {};
     if (!name || typeof name !== 'string' || name.trim().length < 2) {
       return res.status(400).json({ error: 'Klub adı tələb olunur.' });
     }
@@ -40,8 +40,8 @@ module.exports = async (req, res) => {
     try {
       const sql = db();
       const rows = await sql`
-        INSERT INTO clubs(name, description)
-        VALUES(${name.trim()}, ${description || ''})
+        INSERT INTO clubs(name, description, logo_url)
+        VALUES(${name.trim()}, ${description || ''}, ${logoUrl || null})
         RETURNING id
       `;
       await logActivity(user, `Yeni klub yaratdı: ${name.trim()}`, {
@@ -60,7 +60,7 @@ module.exports = async (req, res) => {
     const user = await requirePermission(req, res, 'manage_clubs');
     if (!user) return;
 
-    const { id, name, description } = req.body || {};
+    const { id, name, description, logoUrl } = req.body || {};
     if (!id) return res.status(400).json({ error: 'id tələb olunur.' });
 
     try {
@@ -68,7 +68,8 @@ module.exports = async (req, res) => {
       await sql`
         UPDATE clubs
         SET name        = COALESCE(${name        || null}, name),
-            description = COALESCE(${description || null}, description)
+            description = COALESCE(${description || null}, description),
+            logo_url    = ${logoUrl !== undefined ? (logoUrl || null) : null}
         WHERE id = ${parseInt(id)}
       `;
       await logActivity(user, `Klub məlumatlarını yenilədi (id:${id})`, {
