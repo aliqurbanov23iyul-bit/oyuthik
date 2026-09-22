@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
       const members = isSuperOrAdmin
         ? await sql`
             SELECT u.id, u.full_name, u.group_no, u.faculty, u.role,
-                   u.member_code, u.active, u.position_in_club, u.joined_at,
+                   u.member_code, u.active, u.position_in_club, u.photo_url, u.joined_at,
                    c.name club_name, c.id club_id
             FROM users u
             LEFT JOIN clubs c ON c.id = u.club_id
@@ -106,7 +106,7 @@ module.exports = async (req, res) => {
     const user = await requirePermission(req, res, 'edit_member');
     if (!user) return;
 
-    const { id, fullName, groupNo, faculty, positionInClub, active } = req.body || {};
+    const { id, fullName, groupNo, faculty, positionInClub, active, role, clubId, photoUrl } = req.body || {};
     if (!id) return res.status(400).json({ error: 'id tələb olunur.' });
 
     try {
@@ -120,12 +120,27 @@ module.exports = async (req, res) => {
         }
       }
 
+      const targetBefore = await sql`SELECT role FROM users WHERE id = ${parseInt(id)} LIMIT 1`;
+      if (!targetBefore[0]) return res.status(404).json({ error: 'Üzv tapılmadı.' });
+      if (targetBefore[0].role === 'SUPER_ADMIN' && user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({ error: 'Baş Admin rolunu yalnız Baş Admin dəyişə bilər.' });
+      }
+      let safeRole = undefined;
+      if (role !== undefined) {
+        if (user.role === 'SUPER_ADMIN') safeRole = ['SUPER_ADMIN','ADMIN','CHAIR','MEMBER'].includes(role) ? role : undefined;
+        else if (user.role === 'ADMIN') safeRole = ['ADMIN','CHAIR','MEMBER'].includes(role) ? role : undefined;
+      }
+      const safeClubId = ['SUPER_ADMIN','ADMIN'].includes(user.role) && clubId !== undefined ? (clubId ? parseInt(clubId) : null) : undefined;
+
       await sql`
         UPDATE users
         SET full_name        = COALESCE(${fullName        || null}, full_name),
             group_no         = COALESCE(${groupNo         || null}, group_no),
             faculty          = COALESCE(${faculty         || null}, faculty),
-            position_in_club = COALESCE(${positionInClub  || null}, position_in_club),
+            position_in_club = ${positionInClub !== undefined ? (positionInClub || null) : null},
+            role             = COALESCE(${safeRole || null}, role),
+            club_id          = COALESCE(${safeClubId === undefined ? null : safeClubId}, club_id),
+            photo_url        = ${photoUrl !== undefined ? (photoUrl || null) : null},
             active           = COALESCE(${active !== undefined ? active : null}, active)
         WHERE id = ${parseInt(id)}
       `;
