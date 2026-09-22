@@ -13,15 +13,24 @@ const { db }               = require('../_db');
 const { requirePermission } = require('../_auth');
 
 module.exports = async (req, res) => {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
   const user = await requirePermission(req, res, 'view_activity_logs');
   if (!user) return;
 
   try {
     const sql = db();
+
+    if (req.method === 'DELETE') {
+      if (user.role !== 'SUPER_ADMIN') return res.status(403).json({ error: 'Logları yalnız Baş Admin silə bilər.' });
+      const id = req.body?.id ? parseInt(req.body.id) : null;
+      if (id) {
+        await sql`DELETE FROM activity_logs WHERE id = ${id}`;
+        return res.status(200).json({ ok: true, deleted: 1 });
+      }
+      const result = await sql`DELETE FROM activity_logs`;
+      return res.status(200).json({ ok: true, cleared: true, deleted: result.count || null });
+    }
+
+    if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
     const page    = Math.max(1, parseInt(req.query?.page  || '1'));
     const limit   = Math.min(100, Math.max(1, parseInt(req.query?.limit || '50')));
     const offset  = (page - 1) * limit;
