@@ -2271,14 +2271,29 @@
             <td>${esc(c.description || '—')}</td>
             <td><span class="role-badge role-CHAIR">${c.member_count || 0} üzv</span></td>
             <td style="text-align:right;">
-              <button class="btn-action" onclick="openEditClubModal(${c.id})">
-                <i class="fa-solid fa-pen"></i> Redaktə
-              </button>
+              <div class="action-btn-group" style="justify-content:flex-end;">
+                <button class="btn-action" onclick="openEditClubModal(${c.id})">
+                  <i class="fa-solid fa-pen"></i> Redaktə
+                </button>
+                ${currentUser && currentUser.role === 'SUPER_ADMIN' ? `<button class="btn-action btn-action-danger" onclick="deleteClub(${c.id}, '${esc(c.name).replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i> Sil</button>` : ''}
+              </div>
             </td>
           </tr>
         `).join('');
       } catch (err) {
         console.error('Clubs error:', err);
+      }
+    }
+
+    async function deleteClub(id, name) {
+      if (!confirm('“' + name + '” klubu tam silinəcək. Klub üzvləri silinməyəcək, sadəcə klubdan ayrılacaq. Davam edilsin?')) return;
+      try {
+        await api('/admin/clubs', { method:'DELETE', body:JSON.stringify({ id }) });
+        showToast('Klub silindi!');
+        await loadClubs();
+        await loadOverview();
+      } catch (err) {
+        alert(err.message || 'Klub silinərkən xəta baş verdi.');
       }
     }
 
