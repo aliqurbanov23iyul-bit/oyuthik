@@ -77,6 +77,12 @@ module.exports = async (req, res) => {
       return res.status(401).json({ error: GENERIC_ERROR });
     }
 
+    // Admin panelinə yalnız idarəetmə rolları daxil ola bilər.
+    const ADMIN_ROLES = ['SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR'];
+    if (!ADMIN_ROLES.includes(user.role)) {
+      return res.status(403).json({ error: 'Bu hesabın idarəetmə panelinə giriş icazəsi yoxdur.' });
+    }
+
     // Admin şifrəsi təyin edilməyib
     if (!user.password_hash) {
       return res.status(401).json({ error: GENERIC_ERROR });
