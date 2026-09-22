@@ -105,7 +105,7 @@ function fmtDateTime(d) {
 function roleLabel(role) {
   const labels = {
     SUPER_ADMIN: 'Baş Administrator',
-    ADMIN: 'Administrator',
+    ADMIN: 'İdarəçi',
     CHAIR: 'Klub Sədri',
     VICE_CHAIR: 'Sədr Müavini',
     MEMBER: 'Üzv',
