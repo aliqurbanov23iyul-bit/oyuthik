@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="az">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Kabinetə Giriş — OYU THİK</title>
+  <meta name="description" content="OYU THİK üzv kabinetinə daxil olun. Üzv kodunuz ilə birbaşa girişiniz mümkündür.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #061630 0%, #0c2d65 50%, #0d438e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      font-family: 'Inter', sans-serif;
+    }
+    .login-wrap {
+      width: min(520px, 100%);
+    }
+    .login-card {
+      background: rgba(255,255,255,0.97);
+      border-radius: 28px;
+      padding: 44px 40px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+    }
+    .login-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 32px;
+      text-decoration: none;
+    }
+    .login-logo img {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .login-logo b { display: block; color: #071b3b; font-size: 20px; line-height: 1.2; }
+    .login-logo small { color: #6f7b90; font-size: 13px; }
+    .login-card h1 {
+      font-size: 26px;
+      color: #071b3b;
+      margin: 0 0 8px;
+    }
+    .login-card .subtitle {
+      color: #6f7b90;
+      font-size: 14px;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .input-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      color: #071b3b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 15px 16px 15px 46px;
+      border: 2px solid #dfe8f4;
+      border-radius: 14px;
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #071b3b;
+      background: #f8faff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      text-transform: uppercase;
+    }
+    .input-group input::placeholder {
+      text-transform: none;
+      font-weight: 500;
+      letter-spacing: 0;
+      color: #aab8cc;
+    }
+    .input-group input:focus {
+      border-color: #174fae;
+      box-shadow: 0 0 0 4px rgba(23,79,174,0.12);
+      background: #fff;
+    }
+    .input-group .icon {
+      position: absolute;
+      left: 15px;
+      bottom: 15px;
+      color: #aab8cc;
+      font-size: 17px;
+      transition: color 0.2s;
+      pointer-events: none;
+    }
+    .input-group input:focus ~ .icon { color: #174fae; }
+    .notice-box {
+      background: #eef6ff;
+      border: 1px solid #c8e0ff;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: #1a4b8f;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.6;
+    }
+    .notice-box i { margin-top: 2px; color: #3d7fcc; flex-shrink: 0; }
+    .btn-login {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #102f72, #174fae);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+      box-shadow: 0 8px 25px rgba(16,47,114,0.35);
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-login:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(16,47,114,0.45);
+    }
+    .btn-login:active { transform: translateY(0); }
+    .btn-login:disabled { opacity: 0.7; cursor: not-allowed; }
+    .btn-login .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .btn-login.loading .spinner { display: block; }
+    .btn-login.loading .btn-text { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-msg {
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      color: #991b1b;
+      font-size: 13px;
+      font-weight: 600;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.7);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 24px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #fff; }
+    .code-example {
+      font-family: 'Courier New', monospace;
+      background: #e9f2ff;
+      color: #1550a5;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    @media (max-width: 560px) {
+      .login-card { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <a class="back-link" href="index.html">
+      <i class="fa-solid fa-arrow-left"></i> Ana səhifəyə qayıt
+    </a>
+    <div class="login-card">
+      <a class="login-logo" href="index.html">
+        <img src="logo.png" alt="OYU THİK logo">
+        <div>
+          <b>OYU THİK</b>
+          <small>Üzv kabineti</small>
+        </div>
+      </a>
+
+      <h1>Kabinetə giriş</h1>
+      <p class="subtitle">
+        İdarəetmə şurasının sizə verdikli üzv kodunuzu daxil edin.
+      </p>
+
+      <div class="notice-box">
+        <i class="fa-solid fa-circle-info"></i>
+        <div>
+          Giriş kodu formatı: <span class="code-example">THIK-XXXX-XXXX</span><br>
+          Kodunuz yoxdursa klub sədriniz və ya THİK şurası ilə əlaqə saxlayın.
+        </div>
+      </div>
+
+      <form id="loginForm" autocomplete="off">
+        <div class="input-group">
+          <label for="memberCode">Üzv kodu</label>
+          <input
+            id="memberCode"
+            name="memberCode"
+            type="text"
+            placeholder="Məs: THIK-K7M4-X9QP"
+            required
+            autocomplete="off"
+            spellcheck="false"
+            maxlength="14"
+          >
+          <i class="fa-solid fa-id-card icon"></i>
+        </div>
+
+        <button class="btn-login" id="loginBtn" type="submit">
+          <span class="btn-text"><i class="fa-solid fa-right-to-bracket"></i> Daxil ol</span>
+          <div class="spinner"></div>
+        </button>
+
+        <div class="error-msg" id="errorMsg"></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Format code input: uppercase + auto-dash insertion
+    const codeInput = document.getElementById('memberCode');
+    codeInput.addEventListener('input', function() {
+      let v = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      // THIK-XXXX-XXXX formatı
+      if (v.startsWith('THIK')) {
+        if (v.length > 4) v = 'THIK-' + v.slice(4);
+        if (v.length > 9) v = v.slice(0, 9) + '-' + v.slice(9);
+        v = v.slice(0, 14);
+      }
+      this.value = v;
+    });
+
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn  = document.getElementById('loginBtn');
+    const errorMsg  = document.getElementById('errorMsg');
+
+    // If already logged in, redirect
+    (async () => {
+      try {
+        const d = await api('/auth/me?type=member');
+        if (d.ok) location.href = 'dashboard.html';
+      } catch (_) {}
+    })();
+
+    loginForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const code = codeInput.value.trim();
+      if (!code) return;
+
+      loginBtn.classList.add('loading');
+      loginBtn.disabled = true;
+      errorMsg.classList.remove('show');
+
+      try {
+        const d = await api('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ memberCode: code })
+        });
+
+        if (d.ok) {
+          // Cookie is set by server — just redirect
+          location.href = 'dashboard.html';
+        }
+      } catch (err) {
+        errorMsg.textContent = err.message || 'Giriş məlumatları yanlışdır.';
+        errorMsg.classList.add('show');
+        loginBtn.classList.remove('loading');
+        loginBtn.disabled = false;
+        codeInput.focus();
+      }
+    };
+  </script>
+</body>
+</html>

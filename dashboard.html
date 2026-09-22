@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="az">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Kabinet — OYU THİK</title>
+  <meta name="description" content="OYU THİK üzv şəxsi kabineti. Klub, tədbirlər, elanlar.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --navy: #071b3b;
+      --blue: #102f72;
+      --royal: #174fae;
+      --cyan: #29a8ff;
+      --ice: #f3f7fc;
+      --text: #13213a;
+      --muted: #6f7b90;
+      --white: #fff;
+      --line: #dfe8f4;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; font-family: 'Inter', Arial, sans-serif; color: var(--text); background: #f0f4fa; }
+    a { text-decoration: none; color: inherit; }
+
+    /* Layout */
+    .dash-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg, #071a39 0%, #0b2454 100%);
+      color: #dce7fa;
+      padding: 28px 20px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      text-decoration: none;
+    }
+    .sidebar-logo img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+    .sidebar-logo b { display: block; color: #fff; font-size: 17px; }
+    .sidebar-logo small { color: #7da5d8; font-size: 12px; }
+
+    /* Profile card in sidebar */
+    .sidebar-profile {
+      margin: 24px 0;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px;
+      padding: 20px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .sidebar-avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #174fae, #29a8ff);
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .sidebar-profile-info strong {
+      display: block;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+    .sidebar-profile-info small {
+      color: #7da5d8;
+      font-size: 12px;
+    }
+
+    /* Nav links */
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      color: #93acd1;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .sidebar-nav a.active { background: rgba(23,79,174,0.5); }
+    .sidebar-nav a i { width: 20px; text-align: center; font-size: 16px; }
+    .sidebar-nav .nav-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin: 8px 0;
+    }
+    .sidebar-nav .logout-link { color: #f87171; margin-top: auto; }
+    .sidebar-nav .logout-link:hover { background: rgba(248,113,113,0.1); color: #fca5a5; }
+
+    /* Main content */
+    .dash-main {
+      padding: 36px 40px;
+      background: #f0f4fa;
+      overflow-y: auto;
+    }
+
+    /* Welcome header */
+    .dash-header {
+      margin-bottom: 32px;
+    }
+    .dash-header .greeting {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .dash-header h1 {
+      font-size: 30px;
+      color: var(--navy);
+      margin: 6px 0 4px;
+      font-weight: 900;
+    }
+    .dash-header .date-str { color: var(--muted); font-size: 14px; }
+
+    /* Info cards grid */
+    .info-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+    .info-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 4px 20px rgba(10,36,83,0.06);
+    }
+    .info-card .ic-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .info-card .ic-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1.3;
+    }
+    .info-card .ic-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: #e9f2ff;
+      color: var(--royal);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      margin-bottom: 14px;
+    }
+
+    /* Profile card */
+    .profile-card {
+      background: linear-gradient(135deg, #0c2454, #174fae);
+      border-radius: 24px;
+      padding: 32px;
+      color: #fff;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-card::after {
+      content: 'THİK';
+      position: absolute;
+      right: -10px;
+      bottom: -40px;
+      font-size: 140px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.04);
+    }
+    .profile-card-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: 3px solid rgba(255,255,255,0.3);
+      display: grid;
+      place-items: center;
+      font-size: 36px;
+      font-weight: 900;
+      color: #fff;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .profile-card-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .profile-card-info h2 { margin: 0 0 6px; font-size: 24px; font-weight: 900; }
+    .profile-card-info .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .profile-card-info .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.8);
+    }
+    .profile-card-info .meta-row span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .profile-card-info .meta-row i { opacity: 0.7; }
+
+    /* Section heading */
+    .section-heading {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--navy);
+      margin: 0 0 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-heading i { color: var(--royal); font-size: 18px; }
+
+    /* Content grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    .content-panel {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(10,36,83,0.06);
+    }
+
+    /* Event item */
+    .event-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .event-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .event-date-badge {
+      background: #e9f2ff;
+      color: var(--royal);
+      border-radius: 12px;
+      padding: 10px 12px;
+      text-align: center;
+      min-width: 50px;
+      flex-shrink: 0;
+    }
+    .event-date-badge .day { font-size: 20px; font-weight: 900; line-height: 1; }
+    .event-date-badge .mon { font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .event-item-info strong { display: block; font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .event-item-info span { font-size: 12px; color: var(--muted); }
+
+    /* Announcement item */
+    .ann-item {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .ann-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .ann-item strong { display: block; font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .ann-item p { font-size: 13px; color: var(--muted); margin: 0 0 6px; line-height: 1.6; }
+    .ann-item .ann-meta { font-size: 11px; color: #aab8cc; }
+
+    /* News items */
+    .news-list { display: flex; flex-direction: column; gap: 0; }
+    .news-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+      transition: background 0.15s;
+      border-radius: 8px;
+      padding-left: 6px;
+    }
+    .news-item:last-child { border-bottom: none; }
+    .news-item:hover { background: #f5f8fc; }
+    .news-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0d2e6a, #268bdc);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .news-item-info strong { display: block; font-size: 13px; font-weight: 700; color: var(--navy); }
+    .news-item-info small { font-size: 11px; color: var(--muted); }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .empty-state i { font-size: 28px; display: block; margin-bottom: 10px; opacity: 0.4; }
+
+    /* Loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #e8eef8 25%, #f5f8fc 50%, #e8eef8 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* Mobile hamburger */
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 100;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      width: 42px;
+      height: 42px;
+      font-size: 18px;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+    }
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 49;
+    }
+
+    @media (max-width: 900px) {
+      .dash-layout { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed;
+        left: -300px;
+        top: 0;
+        bottom: 0;
+        z-index: 50;
+        transition: left 0.3s ease;
+        width: 280px;
+      }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .mobile-toggle { display: flex; }
+      .dash-main { padding: 80px 20px 30px; }
+      .profile-card { flex-direction: column; text-align: center; gap: 20px; }
+      .profile-card-info .meta-row { justify-content: center; }
+      .content-grid { grid-template-columns: 1fr; }
+      .info-cards { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .info-cards { grid-template-columns: 1fr; }
+      .dash-header h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<button class="mobile-toggle" id="mobileToggle" aria-label="Menyunu aç">
+  <i class="fa-solid fa-bars"></i>
+</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="dash-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar-logo" href="index.html">
+      <img src="logo.png" alt="OYU THİK">
+      <div>
+        <b>OYU THİK</b>
+        <small>Üzv kabineti</small>
+      </div>
+    </a>
+
+    <div class="sidebar-profile">
+      <div class="sidebar-avatar" id="sidebarAvatar">U</div>
+      <div class="sidebar-profile-info">
+        <strong id="sidebarName">Yüklənir...</strong>
+        <small id="sidebarRole">—</small>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="active" href="dashboard.html">
+        <i class="fa-solid fa-house"></i> Ana səhifə
+      </a>
+      <a href="events.html">
+        <i class="fa-solid fa-calendar-days"></i> Tədbirlər
+      </a>
+      <a href="clubs.html">
+        <i class="fa-solid fa-people-group"></i> Klublar
+      </a>
+      <a href="news.html">
+        <i class="fa-solid fa-newspaper"></i> Xəbərlər
+      </a>
+      <div class="nav-divider"></div>
+      <a class="logout-link" onclick="logout()" style="cursor:pointer">
+        <i class="fa-solid fa-right-from-bracket"></i> Çıxış
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="dash-main">
+    <!-- Header -->
+    <div class="dash-header">
+      <div class="greeting">Xoş gəlmisiniz</div>
+      <h1 id="pageTitle">Kabinet</h1>
+      <div class="date-str" id="dateStr"></div>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <div class="profile-card-avatar" id="profileAvatar">U</div>
+      <div class="profile-card-info">
+        <h2 id="profileName">—</h2>
+        <div class="badge">
+          <i class="fa-solid fa-id-badge"></i>
+          <span id="profileRole">Üzv</span>
+        </div>
+        <div class="meta-row">
+          <span id="metaClub" style="display:none">
+            <i class="fa-solid fa-building-columns"></i>
+            <span id="metaClubText"></span>
+          </span>
+          <span id="metaFaculty" style="display:none">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span id="metaFacultyText"></span>
+          </span>
+          <span id="metaGroup" style="display:none">
+            <i class="fa-solid fa-users"></i>
+            <span id="metaGroupText"></span>
+          </span>
+          <span id="metaJoined" style="display:none">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span id="metaJoinedText"></span>
+          </span>
+          <span id="metaCode">
+            <i class="fa-solid fa-fingerprint"></i>
+            <span id="metaCodeText"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Mini Cards -->
+    <div class="info-cards" id="infoCards">
+      <div class="info-card">
+        <div class="ic-icon"><i class="fa-solid fa-building-columns"></i></div>
+        <div class="ic-label">Klub</div>
+        <div class="ic-value" id="icClub">—</div>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="ic-label">Fakültə</div>
+        <div class="ic-value" id="icFaculty">—</div>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon"><i class="fa-solid fa-users"></i></div>
+        <div class="ic-label">Qrup</div>
+        <div class="ic-value" id="icGroup">—</div>
+      </div>
+      <div class="info-card">
+        <div class="ic-icon"><i class="fa-solid fa-star"></i></div>
+        <div class="ic-label">Vəzifə</div>
+        <div class="ic-value" id="icPosition">Üzv</div>
+      </div>
+    </div>
+
+    <!-- Content Grid: Events + Announcements -->
+    <div class="content-grid">
+      <!-- Upcoming Events -->
+      <div class="content-panel">
+        <div class="section-heading">
+          <i class="fa-solid fa-calendar-days"></i> Yaxın tədbirlər
+        </div>
+        <div id="eventsContainer">
+          <div class="empty-state">
+            <i class="fa-solid fa-calendar"></i>
+            Yüklənir...
+          </div>
+        </div>
+      </div>
+
+      <!-- Announcements -->
+      <div class="content-panel">
+        <div class="section-heading">
+          <i class="fa-solid fa-bullhorn"></i> Elanlar
+        </div>
+        <div id="annsContainer">
+          <div class="empty-state">
+            <i class="fa-solid fa-bullhorn"></i>
+            Yüklənir...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent News -->
+    <div class="content-panel" style="margin-bottom: 32px;">
+      <div class="section-heading">
+        <i class="fa-solid fa-newspaper"></i> Son xəbərlər
+      </div>
+      <div id="newsContainer" class="news-list">
+        <div class="empty-state">
+          <i class="fa-solid fa-newspaper"></i>
+          Yüklənir...
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  // Mobile toggle
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const mobileToggle = document.getElementById('mobileToggle');
+
+  mobileToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+
+  // Date
+  document.getElementById('dateStr').textContent =
+    new Date().toLocaleDateString('az-AZ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Month abbreviations
+  const MONTHS = ['Yan','Fev','Mar','Apr','May','İyn','İyl','Avq','Sen','Okt','Noy','Dek'];
+
+  function setAvatar(el, name, photoUrl) {
+    if (photoUrl) {
+      el.innerHTML = `<img src="${esc(photoUrl)}" alt="${esc(name)}" onerror="this.parentElement.textContent='${esc((name||'?')[0])}'">`
+    } else {
+      el.textContent = (name || '?')[0].toUpperCase();
+    }
+  }
+
+  async function init() {
+    // Auth check
+    const user = await requireMemberSession();
+    if (!user) return;
+
+    // Populate profile
+    const firstName = user.fullName?.split(' ')[0] || 'Üzv';
+    document.getElementById('pageTitle').textContent = 'Salam, ' + firstName;
+
+    document.getElementById('profileName').textContent = user.fullName || '—';
+    setAvatar(document.getElementById('profileAvatar'), user.fullName, user.photoUrl);
+    setAvatar(document.getElementById('sidebarAvatar'), user.fullName, user.photoUrl);
+
+    document.getElementById('sidebarName').textContent = user.fullName || '—';
+    document.getElementById('sidebarRole').textContent =
+      (user.clubName || 'OYU THİK') + ' • ' + (user.positionInClub || roleLabel(user.role));
+
+    document.getElementById('profileRole').textContent =
+      user.positionInClub || roleLabel(user.role);
+
+    if (user.clubName) {
+      document.getElementById('metaClub').style.display = '';
+      document.getElementById('metaClubText').textContent = user.clubName;
+      document.getElementById('icClub').textContent = user.clubName;
+    }
+    if (user.faculty) {
+      document.getElementById('metaFaculty').style.display = '';
+      document.getElementById('metaFacultyText').textContent = user.faculty;
+      document.getElementById('icFaculty').textContent = user.faculty;
+    }
+    if (user.groupNo) {
+      document.getElementById('metaGroup').style.display = '';
+      document.getElementById('metaGroupText').textContent = user.groupNo;
+      document.getElementById('icGroup').textContent = user.groupNo;
+    }
+    if (user.joinedAt) {
+      document.getElementById('metaJoined').style.display = '';
+      document.getElementById('metaJoinedText').textContent = fmtDate(user.joinedAt);
+    }
+    document.getElementById('metaCodeText').textContent = user.memberCode || '—';
+    document.getElementById('icPosition').textContent = user.positionInClub || roleLabel(user.role);
+
+    // Load dashboard data
+    try {
+      const d = await api('/member/dashboard');
+
+      // Events
+      const eventsEl = document.getElementById('eventsContainer');
+      if (d.upcomingEvents?.length) {
+        eventsEl.innerHTML = d.upcomingEvents.map(ev => {
+          const dt = new Date(ev.event_date);
+          return `<div class="event-item">
+            <div class="event-date-badge">
+              <div class="day">${dt.getDate()}</div>
+              <div class="mon">${MONTHS[dt.getMonth()]}</div>
+            </div>
+            <div class="event-item-info">
+              <strong>${esc(ev.title)}</strong>
+              <span><i class="fa-solid fa-location-dot"></i> ${esc(ev.location || 'Yer bildirilməyib')}</span>
+              ${ev.club_name ? `<br><span style="color:#174fae;font-size:11px;font-weight:700">${esc(ev.club_name)}</span>` : ''}
+            </div>
+          </div>`;
+        }).join('');
+      } else {
+        eventsEl.innerHTML = `<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i>Yaxın tədbir yoxdur</div>`;
+      }
+
+      // Announcements
+      const annsEl = document.getElementById('annsContainer');
+      if (d.announcements?.length) {
+        annsEl.innerHTML = d.announcements.map(a =>
+          `<div class="ann-item">
+            <strong>${esc(a.title)}</strong>
+            <p>${esc(a.body)}</p>
+            <div class="ann-meta">${fmtDate(a.created_at)} • ${esc(a.creator_name || 'THİK')}</div>
+          </div>`
+        ).join('');
+      } else {
+        annsEl.innerHTML = `<div class="empty-state"><i class="fa-solid fa-bell-slash"></i>Hal-hazırda elan yoxdur</div>`;
+      }
+
+      // News
+      const newsEl = document.getElementById('newsContainer');
+      if (d.recentNews?.length) {
+        newsEl.innerHTML = d.recentNews.map(n =>
+          `<div class="news-item" onclick="location.href='news.html'">
+            <div class="news-icon"><i class="fa-solid fa-newspaper"></i></div>
+            <div class="news-item-info">
+              <strong>${esc(n.title)}</strong>
+              <small>${esc(n.category || 'Xəbər')} • ${fmtDate(n.created_at)}</small>
+            </div>
+          </div>`
+        ).join('');
+      } else {
+        newsEl.innerHTML = `<div class="empty-state"><i class="fa-solid fa-newspaper"></i>Xəbər tapılmadı</div>`;
+      }
+    } catch (e) {
+      console.error('Dashboard load error:', e.message);
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "oyu-thik",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "migrate": "node migration-runner.js",
+    "seed": "node seed-admin.js",
+    "test": "node test-suite.js"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
