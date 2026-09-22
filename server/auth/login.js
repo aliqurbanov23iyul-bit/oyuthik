@@ -32,6 +32,12 @@ module.exports = async (req, res) => {
 
   const code = memberCode.trim().toUpperCase();
 
+  // Üzv girişi yalnız sistemin yaratdığı real THIK kodları ilə mümkündür.
+  // Xüsusi admin identifikatorları (məs. SUPERADMIN) üzv sessiyası yarada bilməz.
+  if (!/^THIK-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
+    return res.status(401).json({ error: 'Giriş məlumatları yanlışdır.' });
+  }
+
   // Təhlükəsizlik: ümumi xəta mesajı (məlumat sızdırmırıq)
   const GENERIC_ERROR = 'Giriş məlumatları yanlışdır.';
 
