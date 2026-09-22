@@ -1622,6 +1622,16 @@
             <textarea id="clubDescription" name="description" rows="4" placeholder="Klubun məqsədi və fəaliyyət sahəsi"></textarea>
           </div>
           <div class="form-group">
+            <label>Klubun Sosial Media Hesabları</label>
+            <div class="form-grid-2">
+              <div class="form-group"><label for="clubInstagram"><i class="fa-brands fa-instagram"></i> Instagram</label><input id="clubInstagram" name="instagramUrl" type="url" placeholder="https://instagram.com/..."></div>
+              <div class="form-group"><label for="clubTikTok"><i class="fa-brands fa-tiktok"></i> TikTok</label><input id="clubTikTok" name="tiktokUrl" type="url" placeholder="https://tiktok.com/@..."></div>
+              <div class="form-group"><label for="clubWhatsApp"><i class="fa-brands fa-whatsapp"></i> WhatsApp</label><input id="clubWhatsApp" name="whatsappUrl" type="url" placeholder="https://chat.whatsapp.com/..."></div>
+              <div class="form-group"><label for="clubTelegram"><i class="fa-brands fa-telegram"></i> Telegram</label><input id="clubTelegram" name="telegramUrl" type="url" placeholder="https://t.me/..."></div>
+            </div>
+            <small style="color:var(--admin-muted)">Boş saxlanılan sosial şəbəkə klub səhifəsində göstərilməyəcək.</small>
+          </div>
+          <div class="form-group">
             <label for="clubLogoFile">Klub Logosu</label>
             <input id="clubLogoFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none">
             <label for="clubLogoFile" id="clubLogoPicker" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px;border:2px dashed #b9c9df;border-radius:14px;background:#f7faff;color:#315b8f;font-weight:700;cursor:pointer;transition:.2s;">
@@ -2288,6 +2298,10 @@
       document.getElementById('clubId').value = c.id;
       document.getElementById('clubName').value = c.name;
       document.getElementById('clubDescription').value = c.description || '';
+      document.getElementById('clubInstagram').value = c.instagram_url || '';
+      document.getElementById('clubTikTok').value = c.tiktok_url || '';
+      document.getElementById('clubWhatsApp').value = c.whatsapp_url || '';
+      document.getElementById('clubTelegram').value = c.telegram_url || '';
       document.getElementById('clubLogoUrl').value = c.logo_url || '';
       setClubLogoPreview(c.logo_url || '');
       openModal('modalClub');
