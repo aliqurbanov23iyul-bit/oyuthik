@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
     const user = await requirePermission(req, res, 'create_event');
     if (!user) return;
 
-    const { title, eventDate, location, description, clubId } = req.body || {};
+    const { title, eventDate, location, description, clubId, coverUrl } = req.body || {};
     if (!title || !eventDate) {
       return res.status(400).json({ error: 'Başlıq və tarix tələb olunur.' });
     }
@@ -56,14 +56,15 @@ module.exports = async (req, res) => {
     try {
       const sql = db();
       const rows = await sql`
-        INSERT INTO events(title, event_date, location, description, club_id, created_by)
+        INSERT INTO events(title, event_date, location, description, club_id, created_by, cover_url)
         VALUES(
           ${title.trim()},
           ${eventDate},
           ${location    || ''},
           ${description || ''},
           ${targetClubId},
-          ${user.id}
+          ${user.id},
+          ${coverUrl || null}
         )
         RETURNING id
       `;
@@ -80,7 +81,7 @@ module.exports = async (req, res) => {
     const user = await requirePermission(req, res, 'edit_event');
     if (!user) return;
 
-    const { id, title, eventDate, location, description } = req.body || {};
+    const { id, title, eventDate, location, description, coverUrl } = req.body || {};
     if (!id) return res.status(400).json({ error: 'id tələb olunur.' });
 
     try {
@@ -97,7 +98,8 @@ module.exports = async (req, res) => {
         SET title       = COALESCE(${title       || null}, title),
             event_date  = COALESCE(${eventDate   || null}, event_date),
             location    = COALESCE(${location    || null}, location),
-            description = COALESCE(${description || null}, description)
+            description = COALESCE(${description || null}, description),
+            cover_url   = ${coverUrl !== undefined ? (coverUrl || null) : null}
         WHERE id = ${parseInt(id)}
       `;
       await logActivity(user, `Tədbir redaktə etdi (id:${id})`, {
