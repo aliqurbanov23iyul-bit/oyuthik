@@ -173,13 +173,17 @@ async function getAdminSession(req) {
       return acc;
     }, {});
 
-    // Rol presetləri: klub rəhbəri təyin edilən kimi əsas klub idarəetmə imkanları işləməlidir.
-    // DB permission-ları əlavə özəlləşdirmə üçündür; bu presetlər rolun minimum hüquqlarıdır.
-    if ((user.role === 'CHAIR' || user.role === 'VICE_CHAIR') && user.club_id) {
-      const roleDefaults = ['manage_club','view_members','create_member','edit_member','create_news','edit_news','create_event','edit_event'];
-      for (const key of roleDefaults) {
-        if (!user.permissions.includes(key)) user.permissions.push(key);
-        if (user.permissionScopes[key] === undefined) user.permissionScopes[key] = user.club_id;
+    // Sadə rol modeli: rol minimum səlahiyyətləri özü müəyyən edir.
+    // user_permissions yalnız əlavə/fərdi icazələr üçündür.
+    const roleDefaults = {
+      ADMIN: ['manage_club','manage_clubs','view_members','create_member','edit_member','delete_member','create_news','edit_news','delete_news','create_event','edit_event','delete_event','manage_leadership'],
+      CHAIR: ['manage_club','view_members','create_member','edit_member','delete_member','create_news','edit_news','create_event','edit_event'],
+      VICE_CHAIR: ['manage_club','view_members','create_member','edit_member','create_news','edit_news','create_event','edit_event']
+    };
+    for (const key of (roleDefaults[user.role] || [])) {
+      if (!user.permissions.includes(key)) user.permissions.push(key);
+      if ((user.role === 'CHAIR' || user.role === 'VICE_CHAIR') && user.permissionScopes[key] === undefined) {
+        user.permissionScopes[key] = user.club_id;
       }
     }
   }
