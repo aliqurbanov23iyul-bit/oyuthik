@@ -149,7 +149,8 @@ async function getAdminSession(req) {
     WHERE s.id = ${sessionId}
       AND s.expires_at > now()
       AND u.active = true
-      AND (u.role = 'SUPER_ADMIN' OR (ac.active = true))
+      AND u.role IN ('SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR')
+      AND (u.role = 'SUPER_ADMIN' OR ac.active = true)
     LIMIT 1
   `;
   if (!rows[0]) return null;
