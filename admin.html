@@ -394,6 +394,10 @@
       color: var(--admin-royal);
       text-decoration: none;
     }
+    .admin-language-picker{display:flex;align-items:center;gap:3px;padding:4px;background:#edf3fb;border:1px solid var(--admin-border);border-radius:11px}
+    .admin-language-picker button{border:0;background:transparent;color:#6f7b90;padding:7px 9px;border-radius:8px;font:800 11px/1 inherit;cursor:pointer}
+    .admin-language-picker button:hover{background:#fff;color:var(--admin-royal)}
+    .admin-language-picker button.active{background:var(--admin-royal);color:#fff;box-shadow:0 3px 10px rgba(23,79,174,.22)}
     .admin-content-wrap {
       padding: 32px;
       flex: 1;
@@ -1010,6 +1014,11 @@
           <h2 id="topbarTitle">İcmal</h2>
         </div>
         <div class="topbar-right">
+          <div class="admin-language-picker" aria-label="Dil seçimi">
+            <button type="button" data-admin-lang="az">AZ</button>
+            <button type="button" data-admin-lang="en">EN</button>
+            <button type="button" data-admin-lang="ru">RU</button>
+          </div>
           <span id="clubScopeIndicator" style="display:none;font-size:12px;font-weight:700;color:#174fae;background:#edf4fe;padding:6px 12px;border-radius:99px;">
             <i class="fa-solid fa-building-columns"></i> <span id="clubScopeName"></span>
           </span>
@@ -1743,6 +1752,13 @@
     const adminSidebar    = document.getElementById('adminSidebar');
     const sidebarOverlay  = document.getElementById('sidebarOverlay');
     const hamburgerBtn    = document.getElementById('hamburgerBtn');
+
+    // Admin language buttons
+    document.querySelectorAll('[data-admin-lang]').forEach(btn => {
+      const lang = getSiteLang();
+      btn.classList.toggle('active', btn.dataset.adminLang === lang);
+      btn.addEventListener('click', () => setSiteLang(btn.dataset.adminLang));
+    });
 
     // Password visibility toggle on login form
     const pwToggleBtn = document.getElementById('pwToggleBtn');
