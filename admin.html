@@ -335,6 +335,10 @@
       border-color: rgba(220,38,38,0.3);
     }
 
+    .management-board-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+    .board-person-card{background:#fff;border:1px solid var(--admin-border);border-radius:20px;padding:20px;display:flex;gap:16px;align-items:center;box-shadow:0 8px 25px rgba(10,36,83,.05)}
+    .board-avatar{width:72px;height:72px;flex:0 0 72px;border-radius:20px;background:#eaf2ff;color:var(--admin-royal);display:grid;place-items:center;font-size:25px;font-weight:900;overflow:hidden}.board-avatar img{width:100%;height:100%;object-fit:cover}.board-person-card h4{margin:8px 0 4px;font-size:16px}.board-person-card p{margin:0 0 10px;color:var(--admin-muted);font-size:12px}
+    .profile-photo-picker{display:flex!important;align-items:center;justify-content:center;gap:9px;padding:14px!important;border:2px dashed #b9c9df;border-radius:13px;background:#f7faff;color:#315b8f!important;cursor:pointer}
     /* ─── MAIN CONTENT AREA ────────────────────────────────── */
     .admin-main {
       flex: 1;
@@ -972,6 +976,7 @@
         <button class="nav-btn" data-tab="members" id="navMembers">
           <i class="fa-solid fa-users"></i> Üzvlər
         </button>
+        <button class="nav-btn" data-tab="board" id="navBoard"><i class="fa-solid fa-user-tie"></i> İdarəetmə Şurası</button>
         <button class="nav-btn" data-tab="clubs" id="navClubs">
           <i class="fa-solid fa-landmark"></i> Klublar
         </button>
@@ -1398,6 +1403,11 @@
           </div>
         </section>
 
+        <section class="panel-view" id="panel-board">
+          <div class="panel-header"><div class="panel-header-left"><h3>İdarəetmə Şurası</h3><p>Baş administrator, administratorlar və klub sədrlərinin vahid idarəsi</p></div></div>
+          <div class="management-board-grid" id="managementBoardGrid"><p>Yüklənir...</p></div>
+        </section>
+
         <!-- ────────────────────────────────────────────────────── -->
         <!-- TAB 8: FƏALİYYƏT LOGLARI (ACTIVITY LOGS)               -->
         <!-- ────────────────────────────────────────────────────── -->
@@ -1407,6 +1417,7 @@
               <h3>Fəaliyyət və Audit Logları</h3>
               <p>İdarəçilərin sistemdə həyata keçirdiyi bütün əməliyyatların xronoloji qeydiyyatı</p>
             </div>
+            <div class="panel-actions"><button class="btn-action btn-action-danger" id="btnClearLogs" onclick="clearAllLogs()" style="display:none"><i class="fa-solid fa-trash"></i> Bütün logları sil</button></div>
           </div>
 
           <div class="filter-bar">
@@ -1560,6 +1571,17 @@
               <label for="editMemFaculty">Fakültə</label>
               <input id="editMemFaculty" name="faculty">
             </div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group"><label for="editMemRole">Rol</label><select id="editMemRole" name="role"><option value="MEMBER">Üzv</option><option value="CHAIR">Klub Sədri</option><option value="ADMIN">Administrator</option><option value="SUPER_ADMIN">Baş Administrator</option></select></div>
+            <div class="form-group"><label for="editMemClub">Klub</label><select id="editMemClub" name="clubId"><option value="">THİK / Klubsuz</option></select></div>
+          </div>
+          <div class="form-group">
+            <label for="editMemPhotoFile">Profil Şəkli</label>
+            <input id="editMemPhotoFile" type="file" accept="image/png,image/jpeg,image/webp" style="display:none">
+            <label for="editMemPhotoFile" class="profile-photo-picker"><i class="fa-solid fa-camera"></i><span id="editMemPhotoText">Şəkil seç və ya dəyiş</span></label>
+            <input type="hidden" id="editMemPhotoUrl" name="photoUrl">
+            <div id="editMemPhotoPreviewWrap" style="display:none;margin-top:10px"><img id="editMemPhotoPreview" style="width:82px;height:82px;border-radius:50%;object-fit:cover"></div>
           </div>
           <div class="form-group">
             <label for="editMemPosition">Vəzifə</label>
@@ -1896,6 +1918,7 @@
       document.getElementById('badgeName').textContent = currentUser.fullName || 'Administrator';
       document.getElementById('badgeAvatar').textContent = (currentUser.fullName || 'A')[0].toUpperCase();
       document.getElementById('badgeRole').textContent = currentUser.role;
+      const clearLogsBtn=document.getElementById('btnClearLogs'); if(clearLogsBtn) clearLogsBtn.style.display=currentUser.role==='SUPER_ADMIN'?'inline-flex':'none';
 
       // Adjust permissions visibility
       const isSuper = currentUser.role === 'SUPER_ADMIN';
@@ -2017,6 +2040,7 @@
       try {
         const data = await api('/admin/members');
         allMembers = data.members || [];
+        renderManagementBoard();
         renderMembersTable();
         populateUserDropdowns(allMembers);
       } catch (err) {
@@ -2151,6 +2175,9 @@
       document.getElementById('editMemGroup').value = m.group_no || '';
       document.getElementById('editMemFaculty').value = m.faculty || '';
       document.getElementById('editMemPosition').value = m.position_in_club || '';
+      document.getElementById('editMemRole').value = m.role || 'MEMBER';
+      const clubSel=document.getElementById('editMemClub'); clubSel.innerHTML='<option value="">THİK / Klubsuz</option>'+allClubs.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join(''); clubSel.value=m.club_id||'';
+      document.getElementById('editMemPhotoUrl').value=m.photo_url||''; setMemberPhotoPreview(m.photo_url||'');
       document.getElementById('editMemActive').value = m.active ? 'true' : 'false';
       openModal('modalEditMember');
     }
@@ -2160,8 +2187,11 @@
       const form = e.target;
       const data = Object.fromEntries(new FormData(form).entries());
       data.active = data.active === 'true';
+      delete data.editMemPhotoFile;
 
       try {
+        const pf=document.getElementById('editMemPhotoFile').files[0];
+        if(pf) data.photoUrl=await uploadClubLogo(pf);
         await api('/admin/members', {
           method: 'PATCH',
           body: JSON.stringify(data)
@@ -2204,6 +2234,15 @@
       }
     }
 
+    function setMemberPhotoPreview(url){const w=document.getElementById('editMemPhotoPreviewWrap'),i=document.getElementById('editMemPhotoPreview');if(url){i.src=url;w.style.display='block'}else{w.style.display='none';i.removeAttribute('src')}}
+    document.getElementById('editMemPhotoFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f){setMemberPhotoPreview(URL.createObjectURL(f));document.getElementById('editMemPhotoText').textContent=f.name}});
+
+    function renderManagementBoard(){
+      const el=document.getElementById('managementBoardGrid'); if(!el)return;
+      const people=allMembers.filter(m=>['SUPER_ADMIN','ADMIN','CHAIR'].includes(m.role));
+      el.innerHTML=people.length?people.map(m=>'<article class="board-person-card"><div class="board-avatar">'+(m.photo_url?'<img src="'+esc(m.photo_url)+'">':esc((m.full_name||'?')[0]))+'</div><div><span class="role-badge role-'+m.role+'">'+esc(m.role==='SUPER_ADMIN'?'Baş Administrator':m.role==='ADMIN'?'Administrator':'Klub Sədri')+'</span><h4>'+esc(m.full_name)+'</h4><p>'+esc(m.club_name||'OYU THİK')+(m.position_in_club?' • '+esc(m.position_in_club):'')+'</p><button class="btn-action" onclick="openEditMemberModal('+m.id+')"><i class="fa-solid fa-pen"></i> İdarə et</button></div></article>').join(''):'<p>İdarəetmə heyəti tapılmadı.</p>';
+    }
+    async function clearAllLogs(){if(!confirm('Bütün fəaliyyət logları silinəcək. Davam edilsin?'))return;try{await api('/admin/logs',{method:'DELETE',body:JSON.stringify({all:true})});showToast('Bütün loglar silindi!');fetchLogs(1)}catch(e){alert(e.message||'Xəta baş verdi')}}
     // ──────────────────────────────────────────────────────────
     // CLUBS MANAGEMENT
     // ──────────────────────────────────────────────────────────
