@@ -86,3 +86,40 @@
 
 /* Shared logged-in member menu */
 .public-member-nav .member-menu-wrap{position:relative}.public-member-nav .member-chip{border:0;background:#0f4ba8;color:#fff;border-radius:12px;padding:11px 15px;display:flex;align-items:center;gap:9px;font-weight:800;cursor:pointer;white-space:nowrap}.public-member-nav .member-dropdown{display:none;position:absolute;right:0;top:calc(100% + 12px);width:290px;background:#fff;border:1px solid #dce6f3;border-radius:18px;box-shadow:0 18px 50px rgba(7,27,59,.2);padding:14px;z-index:999}.public-member-nav .member-dropdown.open{display:block}.public-member-nav .member-head{display:flex;align-items:center;gap:11px;padding:6px 5px 13px;border-bottom:1px solid #edf1f7}.public-member-nav .member-head small{display:block;color:#718096;margin-top:3px}.public-member-nav .member-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#e7f0ff;color:#1550a5;font-weight:900}.public-member-nav .member-info{display:grid;gap:9px;padding:13px 5px;color:#52647d;font-size:13px}.public-member-nav .member-info span{display:flex;gap:9px;align-items:center}.public-member-nav .member-action{width:100%;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:11px;border:0;border-radius:10px;background:transparent;color:#10284d;text-decoration:none;font-weight:700;cursor:pointer;font-family:inherit}.public-member-nav .member-action:hover{background:#eef5ff}.public-member-nav .member-action.logout{color:#b42318}
+
+
+/* Homepage club cards — cleaner, compact layout */
+#clubGrid .club{
+  padding:22px;
+  min-height:280px;
+  display:flex;
+  flex-direction:column;
+  background:linear-gradient(180deg,#fff 0%,#f8fbff 100%);
+  border:1px solid #dbe7f5;
+  border-radius:22px;
+}
+#clubGrid .club-top{align-items:center;margin-bottom:16px}
+#clubGrid .club-icon{
+  width:66px;height:66px;border-radius:18px;padding:7px;
+  background:#fff;border:1px solid #d7e5f7;
+  box-shadow:0 6px 18px rgba(18,70,145,.08);overflow:hidden;
+}
+#clubGrid .club h3{font-size:20px;margin:0 0 8px;color:#0b3677}
+#clubGrid .club>.meta{
+  margin:0;line-height:1.55;font-size:13.5px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+#clubGrid .club .tag{
+  padding:7px 11px;background:#edf5ff;color:#1454a8;
+  font-size:11px;white-space:nowrap;
+}
+#clubGrid .leader{
+  margin-top:auto;padding-top:16px;min-height:62px;
+}
+#clubGrid .leader .avatar{width:40px;height:40px;flex:0 0 40px}
+#clubGrid .leader b{display:block;font-size:13.5px;color:#123f82}
+#clubGrid .leader .meta{margin-top:2px;font-size:11.5px}
+@media(max-width:850px){
+  #clubGrid .club{min-height:250px;padding:19px}
+  #clubGrid .club-icon{width:58px;height:58px}
+}
