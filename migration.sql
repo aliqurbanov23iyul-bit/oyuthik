@@ -154,3 +154,22 @@ ALTER TABLE events ADD COLUMN IF NOT EXISTS cover_url TEXT;
 -- Vice chair role support
 ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;
 ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR','MEMBER'));
+
+
+-- Discord-style role presentation settings.
+-- Stable role_key remains the authorization identity; display_name/color are editable.
+CREATE TABLE IF NOT EXISTS role_settings(
+  role_key VARCHAR(30) PRIMARY KEY,
+  display_name VARCHAR(80) NOT NULL,
+  color VARCHAR(20) NOT NULL DEFAULT '#174fae',
+  sort_order INT NOT NULL DEFAULT 0,
+  protected BOOLEAN NOT NULL DEFAULT false,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+INSERT INTO role_settings(role_key,display_name,color,sort_order,protected) VALUES
+ ('SUPER_ADMIN','Baş Admin','#dc2626',100,true),
+ ('ADMIN','Admin','#7c3aed',80,true),
+ ('CHAIR','Klub Sədri','#174fae',60,true),
+ ('VICE_CHAIR','Sədr Müavini','#0f9f78',40,true),
+ ('MEMBER','Üzv','#64748b',20,true)
+ON CONFLICT(role_key) DO NOTHING;
