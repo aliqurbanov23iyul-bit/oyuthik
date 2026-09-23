@@ -146,6 +146,10 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true });
     } catch (e) {
       console.error('Update member error:', e);
+      const msg = e && e.message ? String(e.message) : '';
+      if (msg.includes('users_role_check') || msg.includes('violates check constraint')) {
+        return res.status(409).json({ error: 'Database rol qaydası köhnədir. migration.sql yenidən işlədilməlidir.' });
+      }
       return res.status(500).json({ error: 'Server xətası.' });
     }
   }
