@@ -396,3 +396,11 @@ body[data-mobile-page="clubs"] .mobile-bottom-nav [data-mobile-page="clubs"],
 body[data-mobile-page="events"] .mobile-bottom-nav [data-mobile-page="events"],
 body[data-mobile-page="news"] .mobile-bottom-nav [data-mobile-page="news"],
 body[data-mobile-page="leadership"] .mobile-bottom-nav [data-mobile-page="leadership"]{background:#eaf2ff;color:#174fae}
+
+/* Remove empty strip below footer on mobile */
+@media(max-width:850px){
+ html{background:#071b3b!important}
+ body{background:#071b3b!important;padding-bottom:0!important}
+ body:has(.mobile-bottom-nav){padding-bottom:76px!important}
+ .footer{margin-bottom:-76px!important;padding-bottom:98px!important}
+}
