@@ -173,3 +173,16 @@ INSERT INTO role_settings(role_key,display_name,color,sort_order,protected) VALU
  ('VICE_CHAIR','Sədr Müavini','#0f9f78',40,true),
  ('MEMBER','Üzv','#64748b',20,true)
 ON CONFLICT(role_key) DO NOTHING;
+
+
+-- Public THIK gallery
+CREATE TABLE IF NOT EXISTS gallery(
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(180),
+  image_url TEXT NOT NULL,
+  category VARCHAR(80) NOT NULL DEFAULT 'Universitet həyatı',
+  sort_order INT NOT NULL DEFAULT 0,
+  created_by INT REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_gallery_sort ON gallery(sort_order DESC,created_at DESC);
