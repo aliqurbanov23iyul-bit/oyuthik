@@ -992,6 +992,9 @@
         <button class="nav-btn" data-tab="events" id="navEvents">
           <i class="fa-solid fa-calendar-days"></i> Tədbirlər
         </button>
+        <button class="nav-btn" data-tab="gallery" id="navGallery">
+          <i class="fa-solid fa-images"></i> Qalereya
+        </button>
 
         <div class="nav-category" id="catAdmin">Sistem</div>
         <button class="nav-btn" data-tab="roles" id="navRoles">
@@ -1271,6 +1274,19 @@
               </table>
             </div>
           </div>
+        </section>
+
+        <section class="panel-view" id="panel-gallery">
+          <div class="panel-header"><div class="panel-header-left"><h3>Qalereya</h3><p>Saytda görünən THİK və universitet fotolarını idarə et</p></div></div>
+          <div class="table-card" style="padding:20px;margin-bottom:22px">
+            <form id="galleryForm" style="display:grid;grid-template-columns:1.4fr 1fr .7fr auto;gap:12px;align-items:end">
+              <div class="form-group" style="margin:0"><label>Şəkil</label><input id="galleryFile" type="file" accept="image/*" required></div>
+              <div class="form-group" style="margin:0"><label>Başlıq</label><input id="galleryTitle" placeholder="Məs: THİK tədbiri"></div>
+              <div class="form-group" style="margin:0"><label>Kateqoriya</label><select id="galleryCategory"><option>Tədbirlər</option><option>Klublar</option><option>Universitet həyatı</option></select></div>
+              <button class="btn btn-primary" id="galleryUploadBtn" type="submit"><i class="fa-solid fa-cloud-arrow-up"></i> Yüklə</button>
+            </form>
+          </div>
+          <div id="adminGalleryGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px"></div>
         </section>
 
         <!-- ────────────────────────────────────────────────────── -->
@@ -1834,6 +1850,7 @@
     let allMembers = [];
     let allNews = [];
     let allEvents = [];
+    let allGallery = [];
     let availablePermissions = [];
     let currentLogPage = 1;
 
@@ -1913,6 +1930,7 @@
         clubs: 'Klublar',
         news: 'Xəbərlər',
         events: 'Tədbirlər',
+        gallery: 'Qalereya',
         roles: 'Rollar',
         permissions: 'İcazələr',
         adminCreds: 'Admin Şifrələri',
@@ -1925,6 +1943,7 @@
       if (tabName === 'clubs') loadClubs();
       if (tabName === 'news') loadNews();
       if (tabName === 'events') loadEvents();
+      if (tabName === 'gallery') loadGallery();
       if (tabName === 'logs') fetchLogs(1);
     }
 
@@ -2009,6 +2028,9 @@
       if (!hasPerm('create_news') && !hasPerm('edit_news')) {
         document.getElementById('navNews').style.display = 'none';
         document.getElementById('qaBtnNews').style.display = 'none';
+      }
+      if (!hasPerm('manage_gallery')) {
+        document.getElementById('navGallery').style.display = 'none';
       }
       if (!hasPerm('create_event') && !hasPerm('edit_event')) {
         document.getElementById('navEvents').style.display = 'none';
@@ -2507,6 +2529,35 @@
         alert(err.message || 'Xəta baş verdi');
       }
     };
+
+
+    async function loadGallery(){
+      const grid=document.getElementById('adminGalleryGrid');
+      try{
+        const data=await api('/admin?resource=gallery'); allGallery=data.items||[];
+        if(!allGallery.length){grid.innerHTML='<div class="empty-admin-state">Qalereyada hələ foto yoxdur.</div>';return;}
+        grid.innerHTML=allGallery.map(x=>`<article style="background:#fff;border:1px solid var(--admin-border);border-radius:17px;overflow:hidden;box-shadow:0 6px 20px rgba(10,36,83,.05)"><img src="${esc(x.image_url)}" alt="" style="width:100%;height:165px;object-fit:cover;display:block"><div style="padding:13px"><b style="display:block;margin-bottom:5px">${esc(x.title||'Başlıqsız foto')}</b><small style="color:var(--admin-muted)">${esc(x.category||'Universitet həyatı')}</small><button type="button" class="btn-action danger" style="margin-top:10px;width:100%" onclick="deleteGalleryItem(${x.id})"><i class="fa-solid fa-trash"></i> Sil</button></div></article>`).join('');
+      }catch(e){grid.innerHTML='<div class="empty-admin-state">'+esc(e.message||'Qalereya yüklənmədi')+'</div>'}
+    }
+    async function uploadGalleryImage(file){
+      const fd=new FormData(); fd.append('file',file); fd.append('upload_preset',CLOUDINARY_UPLOAD_PRESET);
+      const res=await fetch('https://api.cloudinary.com/v1_1/'+CLOUDINARY_CLOUD_NAME+'/image/upload',{method:'POST',body:fd});
+      const data=await res.json(); if(!res.ok||!data.secure_url) throw new Error((data.error&&data.error.message)||'Şəkil yüklənmədi.');
+      return data.secure_url;
+    }
+    document.getElementById('galleryForm').onsubmit=async(e)=>{
+      e.preventDefault(); const file=document.getElementById('galleryFile').files[0]; if(!file)return;
+      const btn=document.getElementById('galleryUploadBtn'); btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Yüklənir...';
+      try{
+        const imageUrl=await uploadGalleryImage(file);
+        await api('/admin?resource=gallery',{method:'POST',body:JSON.stringify({imageUrl,title:document.getElementById('galleryTitle').value,category:document.getElementById('galleryCategory').value})});
+        e.target.reset(); showToast('Foto qalereyaya əlavə edildi!'); await loadGallery();
+      }catch(err){alert(err.message||'Xəta baş verdi');}finally{btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-cloud-arrow-up"></i> Yüklə';}
+    };
+    async function deleteGalleryItem(id){
+      if(!confirm('Bu fotonu qalereyadan silmək istəyirsiniz?'))return;
+      try{await api('/admin?resource=gallery',{method:'DELETE',body:JSON.stringify({id})});showToast('Foto silindi.');await loadGallery();}catch(e){alert(e.message||'Xəta baş verdi');}
+    }
 
     // ──────────────────────────────────────────────────────────
     // NEWS MANAGEMENT
