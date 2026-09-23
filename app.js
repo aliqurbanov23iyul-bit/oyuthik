@@ -286,19 +286,6 @@ function initMobileNavigation(){
     document.addEventListener('click',e=>{if(!nav.contains(e.target)&&!links.contains(e.target))close()});
   });
 
-  if(!document.querySelector('.mobile-bottom-nav')){
-    const bottom=document.createElement('nav');
-    bottom.className='mobile-bottom-nav';
-    bottom.setAttribute('aria-label','Mobil əsas menyu');
-    const active=(names)=>names.includes(file)?' active':'';
-    bottom.innerHTML=
-      '<a class="'+active(['index.html'])+'" href="index.html"><span>⌂</span><b>Ana səhifə</b></a>'+
-      '<a class="'+active(['about.html'])+'" href="about.html"><span>ⓘ</span><b>Haqqımızda</b></a>'+
-      '<a class="'+active(['clubs.html','club.html'])+'" href="clubs.html"><span>♢</span><b>Klublar</b></a>'+
-      '<a class="'+active(['events.html','event.html'])+'" href="events.html"><span>◷</span><b>Tədbirlər</b></a>'+
-      '<a class="'+active(['news.html'])+'" href="news.html"><span>▤</span><b>Xəbərlər</b></a>'+
-      '<a class="'+active(['leadership.html'])+'" href="leadership.html"><span>♙</span><b>Rəhbərlik</b></a>';
-    document.body.appendChild(bottom);
-  }
+
 }
 document.addEventListener('DOMContentLoaded',initMobileNavigation);
