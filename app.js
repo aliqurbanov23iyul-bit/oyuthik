@@ -238,8 +238,10 @@ document.addEventListener('DOMContentLoaded',syncPublicMemberNav);
 /* Mobile public navigation */
 function initMobileNavigation(){
   const publicPages=['index.html','clubs.html','events.html','news.html','about.html','leadership.html','club.html','event.html'];
-  const file=(location.pathname.split('/').pop()||'index.html').toLowerCase();
-  if(!publicPages.includes(file)) return;
+  const rawFile=(location.pathname.split('/').pop()||'index.html').toLowerCase();
+  const file=(rawFile.split('?')[0].split('#')[0]||'index.html');
+  const isPublicPage=publicPages.includes(file) || document.querySelector('.navbar .nav');
+  if(!isPublicPage) return;
 
   document.querySelectorAll('.navbar .nav').forEach(nav=>{
     const links=nav.querySelector('.navlinks');
