@@ -38,6 +38,31 @@ module.exports = async (req, res) => {
       return res.status(405).json({error:'Method not allowed'});
     }
 
+    if (req.query && req.query.resource === 'gallery') {
+      if (!['SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR'].includes(user.role)) return res.status(403).json({ error: 'İcazə yoxdur.' });
+      if (req.method === 'GET') {
+        const items = await sql`SELECT * FROM gallery ORDER BY sort_order DESC, created_at DESC`;
+        return res.json({ items });
+      }
+      if (req.method === 'POST') {
+        const {title,imageUrl,category,sortOrder}=req.body||{};
+        if (!imageUrl) return res.status(400).json({error:'Şəkil tələb olunur.'});
+        const rows=await sql`INSERT INTO gallery(title,image_url,category,sort_order,created_by) VALUES (${String(title||'').trim()},${String(imageUrl)},${String(category||'Universitet həyatı')},${Number(sortOrder)||0},${user.id}) RETURNING *`;
+        return res.status(201).json({ok:true,item:rows[0]});
+      }
+      if (req.method === 'PATCH') {
+        const {id,title,category,sortOrder}=req.body||{};
+        await sql`UPDATE gallery SET title=${String(title||'').trim()},category=${String(category||'Universitet həyatı')},sort_order=${Number(sortOrder)||0} WHERE id=${Number(id)}`;
+        return res.json({ok:true});
+      }
+      if (req.method === 'DELETE') {
+        const id=Number((req.body||{}).id);
+        await sql`DELETE FROM gallery WHERE id=${id}`;
+        return res.json({ok:true});
+      }
+      return res.status(405).json({error:'Method not allowed'});
+    }
+
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
     const isSuperOrAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(user.role);
 
