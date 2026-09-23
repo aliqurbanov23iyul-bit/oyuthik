@@ -1593,7 +1593,7 @@
             </div>
           </div>
           <div class="form-grid-2">
-            <div class="form-group"><label>Rol</label><div class="notice-banner" style="margin:0;padding:12px 14px;"><i class="fa-solid fa-shield"></i><div><b id="editMemRoleText">Üzv</b><br><small>Rol bu pəncərədən dəyişmir. Klub rəhbərliyi “Klublar” bölməsindən idarə olunur.</small></div></div><input type="hidden" id="editMemRole" value="MEMBER"></div>
+            <div class="form-group"><label for="editMemRole">Rol</label><select id="editMemRole" name="role"><option value="MEMBER">Üzv</option><option value="VICE_CHAIR">Sədr Müavini</option><option value="CHAIR">Klub Sədri</option><option value="ADMIN">Admin</option><option value="SUPER_ADMIN">Baş Admin</option></select><small id="editMemRoleHelp" class="role-help">Rolu yalnız Baş Admin dəyişə bilər.</small></div>
             <div class="form-group"><label for="editMemClub">Klub</label><select id="editMemClub" name="clubId"><option value="">THİK / Klubsuz</option></select></div>
           </div>
           <div class="form-group">
@@ -2248,7 +2248,7 @@
       document.getElementById('editMemGroup').value = m.group_no || '';
       document.getElementById('editMemFaculty').value = m.faculty || '';
       document.getElementById('editMemPosition').value = m.position_in_club || '';
-      document.getElementById('editMemRole').value = m.role || 'MEMBER'; const rt=document.getElementById('editMemRoleText'); if(rt) rt.textContent=roleLabel(m.role || 'MEMBER');
+      const roleSel=document.getElementById('editMemRole'); roleSel.value=m.role||'MEMBER'; roleSel.disabled=currentUser.role!=='SUPER_ADMIN'; document.getElementById('editMemRoleHelp').textContent=currentUser.role==='SUPER_ADMIN'?'Baş Admin bu üzvün sistem rolunu dəyişə bilər.':'Rolu yalnız Baş Admin dəyişə bilər.';
       const clubSel=document.getElementById('editMemClub'); clubSel.innerHTML='<option value="">THİK / Klubsuz</option>'+allClubs.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join(''); clubSel.value=m.club_id||'';
       document.getElementById('editMemPhotoUrl').value=m.photo_url||''; setMemberPhotoPreview(m.photo_url||'');
       document.getElementById('editMemActive').value = m.active ? 'true' : 'false';
@@ -2261,7 +2261,7 @@
       const data = Object.fromEntries(new FormData(form).entries());
       data.active = data.active === 'true';
       delete data.editMemPhotoFile;
-      delete data.role; // rol ayrıca rəhbərlik/səlahiyyət axınından dəyişir
+      if(currentUser.role!=='SUPER_ADMIN') delete data.role;
 
       try {
         const pf=document.getElementById('editMemPhotoFile').files[0];
