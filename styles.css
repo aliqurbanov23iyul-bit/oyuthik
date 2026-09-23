@@ -362,3 +362,14 @@
  .mobile-menu-btn.is-open .menu-icon i:nth-child(2){opacity:0;width:0}
  .mobile-menu-btn.is-open .menu-icon i:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
 }
+
+/* Mobile header: keep one clear action beside the profile */
+@media(max-width:850px){
+ .mobile-menu-btn{display:none!important}
+ .nav{grid-template-columns:minmax(0,1fr) auto!important}
+ #memberNav,.public-member-nav{grid-column:2!important}
+ .navlinks{
+   display:none!important;
+ }
+ .mobile-bottom-nav{display:grid!important}
+}
