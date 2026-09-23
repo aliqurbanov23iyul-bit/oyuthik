@@ -385,3 +385,14 @@
  .mobile-bottom-nav a span{font-size:17px!important}
  .mobile-bottom-nav a b{font-size:8px!important;white-space:nowrap!important}
 }
+
+/* Persistent mobile nav active page */
+@media(max-width:850px){
+ body:has(.page-head) .mobile-bottom-nav{display:grid!important}
+}
+body[data-mobile-page="home"] .mobile-bottom-nav [data-mobile-page="home"],
+body[data-mobile-page="about"] .mobile-bottom-nav [data-mobile-page="about"],
+body[data-mobile-page="clubs"] .mobile-bottom-nav [data-mobile-page="clubs"],
+body[data-mobile-page="events"] .mobile-bottom-nav [data-mobile-page="events"],
+body[data-mobile-page="news"] .mobile-bottom-nav [data-mobile-page="news"],
+body[data-mobile-page="leadership"] .mobile-bottom-nav [data-mobile-page="leadership"]{background:#eaf2ff;color:#174fae}
