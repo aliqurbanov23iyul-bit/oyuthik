@@ -127,18 +127,17 @@ module.exports = async (req, res) => {
       }
       const safeClubId = ['SUPER_ADMIN','ADMIN'].includes(user.role) && clubId !== undefined ? (clubId ? parseInt(clubId) : null) : undefined;
 
-      await sql`
-        UPDATE users
-        SET full_name        = COALESCE(${fullName        || null}, full_name),
-            group_no         = COALESCE(${groupNo         || null}, group_no),
-            faculty          = COALESCE(${faculty         || null}, faculty),
-            position_in_club = ${positionInClub !== undefined ? (positionInClub || null) : null},
-            role             = COALESCE(${safeRole || null}, role),
-            club_id          = COALESCE(${safeClubId === undefined ? null : safeClubId}, club_id),
-            photo_url        = ${photoUrl !== undefined ? (photoUrl || null) : null},
-            active           = COALESCE(${active !== undefined ? active : null}, active)
-        WHERE id = ${parseInt(id)}
-      `;
+      const targetId = parseInt(id);
+      // Update only fields actually supplied. This avoids nulling optional columns
+      // and keeps role changes independent from profile/photo edits.
+      if (fullName !== undefined) await sql`UPDATE users SET full_name = ${String(fullName).trim()} WHERE id = ${targetId}`;
+      if (groupNo !== undefined) await sql`UPDATE users SET group_no = ${groupNo || null} WHERE id = ${targetId}`;
+      if (faculty !== undefined) await sql`UPDATE users SET faculty = ${faculty || null} WHERE id = ${targetId}`;
+      if (positionInClub !== undefined) await sql`UPDATE users SET position_in_club = ${positionInClub || null} WHERE id = ${targetId}`;
+      if (safeRole !== undefined) await sql`UPDATE users SET role = ${safeRole} WHERE id = ${targetId}`;
+      if (safeClubId !== undefined) await sql`UPDATE users SET club_id = ${safeClubId} WHERE id = ${targetId}`;
+      if (photoUrl !== undefined) await sql`UPDATE users SET photo_url = ${photoUrl || null} WHERE id = ${targetId}`;
+      if (active !== undefined) await sql`UPDATE users SET active = ${!!active} WHERE id = ${targetId}`;
 
       await logActivity(user, `Üzv məlumatlarını yenilədi (id:${id})`, {
         targetType: 'user', targetId: parseInt(id), ip
@@ -146,6 +145,7 @@ module.exports = async (req, res) => {
 
       return res.status(200).json({ ok: true });
     } catch (e) {
+      console.error('Update member error:', e);
       return res.status(500).json({ error: 'Server xətası.' });
     }
   }
