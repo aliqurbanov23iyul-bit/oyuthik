@@ -994,6 +994,9 @@
         </button>
 
         <div class="nav-category" id="catAdmin">Sistem</div>
+        <button class="nav-btn" data-tab="roles" id="navRoles">
+          <i class="fa-solid fa-tags"></i> Rollar
+        </button>
         <button class="nav-btn" data-tab="permissions" id="navPermissions">
           <i class="fa-solid fa-shield-halved"></i> İcazələr (Permissions)
         </button>
@@ -1311,6 +1314,17 @@
         <!-- ────────────────────────────────────────────────────── -->
         <!-- TAB 6: İCAZƏLƏR (PERMISSIONS)                          -->
         <!-- ────────────────────────────────────────────────────── -->
+        <section class="panel-view" id="panel-roles">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <h3>Rollar</h3>
+              <p>Discord məntiqi: sistem rolunun kodu sabit qalır, görünən adı və rəngi buradan dəyişir.</p>
+            </div>
+          </div>
+          <div class="notice-banner"><i class="fa-solid fa-circle-info"></i><div><b>Təhlükəsiz rol sistemi</b><br><small>Rolun daxili kodu dəyişmir. Buna görə adını dəyişmək giriş və icazələri pozmur.</small></div></div>
+          <div id="rolesGrid" class="management-board-grid"><div class="empty-admin-state">Rollar yüklənir...</div></div>
+        </section>
+
         <section class="panel-view" id="panel-permissions">
           <div class="panel-header">
             <div class="panel-header-left">
@@ -1899,6 +1913,7 @@
         clubs: 'Klublar',
         news: 'Xəbərlər',
         events: 'Tədbirlər',
+        roles: 'Rollar',
         permissions: 'İcazələr',
         adminCreds: 'Admin Şifrələri',
         logs: 'Fəaliyyət Logları'
@@ -1906,6 +1921,7 @@
       document.getElementById('topbarTitle').textContent = titles[tabName] || 'İdarəetmə';
 
       if (tabName === 'members') renderMembersTable();
+      if (tabName === 'roles') loadRoles();
       if (tabName === 'clubs') loadClubs();
       if (tabName === 'news') loadNews();
       if (tabName === 'events') loadEvents();
@@ -2023,6 +2039,8 @@
         document.getElementById('navBoard').style.display = 'none';
       }
 
+      const navRoles=document.getElementById('navRoles'); if(navRoles && currentUser.role!=='SUPER_ADMIN') navRoles.style.display='none';
+
       if (!hasPerm('manage_permissions') && !hasPerm('manage_admins') && !hasPerm('view_activity_logs')) {
         document.getElementById('catAdmin').style.display = 'none';
       }
@@ -2040,6 +2058,32 @@
       await loadOverview();
       await loadMembers();
       if (hasPerm('manage_permissions')) loadPermissionsList();
+    }
+
+    async function loadRoles(){
+      const box=document.getElementById('rolesGrid'); if(!box)return;
+      try{
+        const d=await api('/roles');
+        const roles=d.roles||[];
+        box.innerHTML=roles.map(r=>`<article class="board-person-card" style="align-items:flex-start">
+          <div style="width:16px;height:52px;border-radius:99px;background:${esc(r.color)};flex:0 0 16px"></div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><small style="color:var(--admin-muted);font-weight:800">${esc(r.role_key)}</small><h4 style="margin:3px 0 4px">${esc(r.display_name)}</h4></div><span class="role-badge">${r.member_count} üzv</span></div>
+            <div class="form-group" style="margin:12px 0 8px"><label>Görünən ad</label><input id="role-name-${r.role_key}" value="${esc(r.display_name)}" maxlength="80"></div>
+            <div style="display:grid;grid-template-columns:1fr 100px;gap:10px;align-items:end">
+              <div class="form-group" style="margin:0"><label>Rəng</label><input id="role-color-${r.role_key}" type="color" value="${esc(r.color)}" style="height:46px;padding:5px"></div>
+              <div class="form-group" style="margin:0"><label>Sıra</label><input id="role-sort-${r.role_key}" type="number" value="${r.sort_order}" style="height:46px"></div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:12px;width:100%" onclick="saveRole('${r.role_key}')"><i class="fa-solid fa-floppy-disk"></i> Yadda saxla</button>
+          </div>
+        </article>`).join('')||'<div class="empty-admin-state">Rol tapılmadı.</div>';
+      }catch(e){box.innerHTML='<div class="empty-admin-state">'+esc(e.message||'Rollar yüklənmədi')+'</div>'}
+    }
+    async function saveRole(key){
+      try{
+        await api('/roles',{method:'PATCH',body:JSON.stringify({roleKey:key,displayName:document.getElementById('role-name-'+key).value,color:document.getElementById('role-color-'+key).value,sortOrder:Number(document.getElementById('role-sort-'+key).value||0)})});
+        showToast('Rol yeniləndi.','success'); await loadRoles();
+      }catch(e){showToast(e.message||'Rol yenilənmədi.','error')}
     }
 
     // ──────────────────────────────────────────────────────────
