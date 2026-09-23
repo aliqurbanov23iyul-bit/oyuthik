@@ -373,3 +373,15 @@
  }
  .mobile-bottom-nav{display:grid!important}
 }
+
+/* Mobile bottom navigation: show every public category */
+@media(max-width:850px){
+ .mobile-bottom-nav{
+   grid-template-columns:repeat(6,minmax(0,1fr))!important;
+   left:6px!important;right:6px!important;
+   height:64px!important;padding:5px 3px!important;
+ }
+ .mobile-bottom-nav a{padding:4px 1px!important;gap:3px!important}
+ .mobile-bottom-nav a span{font-size:17px!important}
+ .mobile-bottom-nav a b{font-size:8px!important;white-space:nowrap!important}
+}
