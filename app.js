@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 /* Shared member navigation for every public page */
 async function syncPublicMemberNav(){
-  const hosts=[...document.querySelectorAll('.public-member-nav')];
+  const hosts=[...document.querySelectorAll('.public-member-nav, #memberNav')];
   if(!hosts.length)return;
   try{
     const d=await api('/auth/me?type=member');
@@ -235,22 +235,66 @@ document.addEventListener('click',()=>document.querySelectorAll('.shared-member-
 document.addEventListener('DOMContentLoaded',syncPublicMemberNav);
 
 
-/* Shared mobile navigation */
+/* Mobile public navigation */
 function initMobileNavigation(){
- document.querySelectorAll('.navbar .nav').forEach(nav=>{
-  const links=nav.querySelector('.navlinks');
-  if(!links)return;
-  let btn=nav.querySelector('.mobile-menu-btn');
-  if(!btn){
-   btn=document.createElement('button');
-   btn.type='button';btn.className='mobile-menu-btn';btn.setAttribute('aria-label','Menyu');btn.setAttribute('aria-expanded','false');
-   btn.innerHTML='<span>☰</span>';
-   nav.appendChild(btn);
+  const publicPages=['index.html','clubs.html','events.html','news.html','about.html','leadership.html','club.html','event.html'];
+  const file=(location.pathname.split('/').pop()||'index.html').toLowerCase();
+  if(!publicPages.includes(file)) return;
+
+  document.querySelectorAll('.navbar .nav').forEach(nav=>{
+    const links=nav.querySelector('.navlinks');
+    if(!links) return;
+
+    let btn=nav.querySelector('.mobile-menu-btn');
+    if(!btn){
+      btn=document.createElement('button');
+      btn.type='button';
+      btn.className='mobile-menu-btn';
+      btn.setAttribute('aria-label','Menyunu aç');
+      btn.setAttribute('aria-expanded','false');
+      btn.innerHTML='<span aria-hidden="true">☰</span>';
+      nav.appendChild(btn);
+    }
+
+    if(!links.querySelector('.mobile-lang-row')){
+      const row=document.createElement('div');
+      row.className='mobile-lang-row';
+      const current=getSiteLang();
+      row.innerHTML=SITE_LANGS.map(l=>'<button type="button" data-mobile-lang="'+l+'" class="'+(l===current?'active':'')+'">'+l.toUpperCase()+'</button>').join('');
+      links.appendChild(row);
+      row.querySelectorAll('button').forEach(x=>x.onclick=e=>{e.stopPropagation();setSiteLang(x.dataset.mobileLang)});
+    }
+
+    const close=()=>{
+      links.classList.remove('mobile-open');
+      btn.setAttribute('aria-expanded','false');
+      btn.querySelector('span').textContent='☰';
+    };
+    btn.addEventListener('click',e=>{
+      e.preventDefault();e.stopPropagation();
+      const opening=!links.classList.contains('mobile-open');
+      close();
+      if(opening){
+        links.classList.add('mobile-open');
+        btn.setAttribute('aria-expanded','true');
+        btn.querySelector('span').textContent='×';
+      }
+    });
+    links.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));
+    document.addEventListener('click',e=>{if(!nav.contains(e.target)&&!links.contains(e.target))close()});
+  });
+
+  if(!document.querySelector('.mobile-bottom-nav')){
+    const bottom=document.createElement('nav');
+    bottom.className='mobile-bottom-nav';
+    bottom.setAttribute('aria-label','Mobil əsas menyu');
+    const active=(names)=>names.includes(file)?' active':'';
+    bottom.innerHTML=
+      '<a class="'+active(['index.html'])+'" href="index.html"><span>⌂</span><b>Ana səhifə</b></a>'+
+      '<a class="'+active(['clubs.html','club.html'])+'" href="clubs.html"><span>♢</span><b>Klublar</b></a>'+
+      '<a class="'+active(['events.html','event.html'])+'" href="events.html"><span>◷</span><b>Tədbirlər</b></a>'+
+      '<a class="'+active(['news.html'])+'" href="news.html"><span>▤</span><b>Xəbərlər</b></a>';
+    document.body.appendChild(bottom);
   }
-  const close=()=>{links.classList.remove('mobile-open');btn.setAttribute('aria-expanded','false');btn.querySelector('span').textContent='☰'};
-  btn.onclick=function(e){e.preventDefault();e.stopPropagation();const open=!links.classList.contains('mobile-open');close();if(open){links.classList.add('mobile-open');btn.setAttribute('aria-expanded','true');btn.querySelector('span').textContent='×'}};
-  links.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));
-  document.addEventListener('click',e=>{if(!nav.contains(e.target))close()});
- });
 }
 document.addEventListener('DOMContentLoaded',initMobileNavigation);
