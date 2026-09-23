@@ -15,7 +15,7 @@ ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
 ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;
 --    Yenisini əlavə et
 ALTER TABLE users ADD CONSTRAINT users_role_check
-  CHECK (role IN ('SUPER_ADMIN','ADMIN','CHAIR','MEMBER'));
+  CHECK (role IN ('SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR','MEMBER'));
 
 -- 3. Permissions cədvəli (mövcud icazə açarları)
 CREATE TABLE IF NOT EXISTS permissions (
