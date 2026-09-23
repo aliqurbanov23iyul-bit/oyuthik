@@ -404,3 +404,29 @@ body[data-mobile-page="leadership"] .mobile-bottom-nav [data-mobile-page="leader
  body:has(.mobile-bottom-nav){padding-bottom:76px!important}
  .footer{margin-bottom:-76px!important;padding-bottom:98px!important}
 }
+
+/* Final mobile navigation: top hamburger only */
+@media(max-width:850px){
+ .mobile-bottom-nav{display:none!important}
+ body,body:has(.mobile-bottom-nav){padding-bottom:0!important}
+ .footer{margin-bottom:0!important;padding-bottom:36px!important}
+ .mobile-menu-btn{display:grid!important}
+ .nav{display:grid!important;grid-template-columns:minmax(0,1fr) auto 40px!important}
+ #memberNav,.public-member-nav{grid-column:2!important}
+ .mobile-menu-btn{grid-column:3!important}
+ .navlinks{
+   display:none!important;position:fixed!important;
+   top:70px!important;left:12px!important;right:12px!important;
+   width:auto!important;max-height:calc(100dvh - 84px)!important;
+   overflow-y:auto!important;padding:8px!important;
+   border-radius:16px!important;background:#fff!important;
+   box-shadow:0 18px 50px rgba(7,27,59,.22)!important;
+   z-index:5100!important
+ }
+ .navlinks.mobile-open{display:flex!important;flex-direction:column!important}
+ .navlinks a[href="clubs.html"],
+ .navlinks a[href="events.html"],
+ .navlinks a[href="news.html"]{display:flex!important}
+ .navlinks a{min-height:47px!important}
+ .mobile-lang-row{display:grid!important}
+}
