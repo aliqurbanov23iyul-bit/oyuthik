@@ -430,3 +430,35 @@ body[data-mobile-page="leadership"] .mobile-bottom-nav [data-mobile-page="leader
  .navlinks a{min-height:47px!important}
  .mobile-lang-row{display:grid!important}
 }
+
+/* Mobile homepage content redesign — light, clean cards */
+@media(max-width:850px){
+ /* only the hero stays blue; content after it becomes light */
+ .hero + .container,
+ .hero ~ .section,
+ .hero ~ section{background:#f6f8fc!important}
+ .hero + .container{width:auto!important;max-width:none!important;margin:0!important;padding:20px 16px 6px!important}
+
+ .stats{margin:0!important;gap:10px!important}
+ .stat{
+   background:#fff!important;border:1px solid #e1e8f2!important;
+   box-shadow:0 7px 22px rgba(15,45,90,.06)!important;
+   padding:17px!important;border-radius:17px!important
+ }
+ .stat strong{color:#123f83!important}
+ .stat span{color:#718096!important}
+
+ .section{background:#f6f8fc!important}
+ .section-title .eyebrow{color:#3376c8!important}
+ .section-title h2{color:#10284d!important}
+ .section-title p{color:#718096!important}
+ .section-title>a{
+   background:#fff!important;color:#1550a5!important;
+   border:1px solid #dbe5f2!important;box-shadow:0 4px 14px rgba(20,55,100,.05)!important
+ }
+
+ #newsGrid .card,#clubGrid .club,.card{
+   background:#fff!important;border:1px solid #e0e8f2!important;
+   box-shadow:0 8px 24px rgba(16,48,92,.06)!important
+ }
+}
