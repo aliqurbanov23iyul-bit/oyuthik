@@ -2063,7 +2063,7 @@
     async function loadRoles(){
       const box=document.getElementById('rolesGrid'); if(!box)return;
       try{
-        const d=await api('/roles');
+        const d=await api('/admin?resource=roles');
         const roles=d.roles||[];
         box.innerHTML=roles.map(r=>`<article class="board-person-card" style="align-items:flex-start">
           <div style="width:16px;height:52px;border-radius:99px;background:${esc(r.color)};flex:0 0 16px"></div>
@@ -2081,7 +2081,7 @@
     }
     async function saveRole(key){
       try{
-        await api('/roles',{method:'PATCH',body:JSON.stringify({roleKey:key,displayName:document.getElementById('role-name-'+key).value,color:document.getElementById('role-color-'+key).value,sortOrder:Number(document.getElementById('role-sort-'+key).value||0)})});
+        await api('/admin?resource=roles',{method:'PATCH',body:JSON.stringify({roleKey:key,displayName:document.getElementById('role-name-'+key).value,color:document.getElementById('role-color-'+key).value,sortOrder:Number(document.getElementById('role-sort-'+key).value||0)})});
         showToast('Rol yeniləndi.','success'); await loadRoles();
       }catch(e){showToast(e.message||'Rol yenilənmədi.','error')}
     }
