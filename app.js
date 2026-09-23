@@ -252,7 +252,7 @@ function initMobileNavigation(){
       btn.className='mobile-menu-btn';
       btn.setAttribute('aria-label','Menyunu aç');
       btn.setAttribute('aria-expanded','false');
-      btn.innerHTML='<span aria-hidden="true">☰</span>';
+      btn.innerHTML='<span class="menu-icon" aria-hidden="true"><i></i><i></i><i></i></span>';
       nav.appendChild(btn);
     }
 
@@ -268,7 +268,7 @@ function initMobileNavigation(){
     const close=()=>{
       links.classList.remove('mobile-open');
       btn.setAttribute('aria-expanded','false');
-      btn.querySelector('span').textContent='☰';
+      btn.classList.remove('is-open');
     };
     btn.addEventListener('click',e=>{
       e.preventDefault();e.stopPropagation();
@@ -277,7 +277,7 @@ function initMobileNavigation(){
       if(opening){
         links.classList.add('mobile-open');
         btn.setAttribute('aria-expanded','true');
-        btn.querySelector('span').textContent='×';
+        btn.classList.add('is-open');
       }
     });
     links.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));
