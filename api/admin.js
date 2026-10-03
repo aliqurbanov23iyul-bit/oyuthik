@@ -13,6 +13,19 @@ module.exports = async (req, res) => {
   try {
     const sql = db();
 
+    if (req.query?.resource === 'socials') {
+      if (!['SUPER_ADMIN','ADMIN'].includes(user.role)) return res.status(403).json({error:'Sayt bağlantılarını yalnız admin dəyişə bilər.'});
+      if (req.method === 'GET') return res.json({socials: await sql`SELECT platform,username FROM site_socials ORDER BY platform`});
+      if (req.method === 'PATCH') {
+        const {socialUsername} = require('./_socials');
+        let entries;
+        try { entries = ['instagram','tiktok','telegram'].map(platform => [platform, socialUsername(platform, req.body?.[platform] ?? '')]); }
+        catch (e) { return res.status(400).json({error:e.message}); }
+        await sql.transaction(entries.map(([platform,username]) => sql`INSERT INTO site_socials(platform,username) VALUES (${platform},${username}) ON CONFLICT(platform) DO UPDATE SET username=EXCLUDED.username`));
+        return res.json({ok:true});
+      }
+      return res.status(405).json({error:'Method not allowed'});
+    }
     // Discord-style role settings live here to avoid adding another Vercel function.
     if (req.query && req.query.resource === 'roles') {
       if (user.role !== 'SUPER_ADMIN') return res.status(403).json({ error: 'Rolları yalnız Baş Admin idarə edə bilər.' });
@@ -27,7 +40,7 @@ module.exports = async (req, res) => {
       }
       if (req.method === 'PATCH') {
         const {roleKey,displayName,color,sortOrder}=req.body||{};
-        const allowed=['SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR','MEMBER'];
+        const allowed=['SUPER_ADMIN','ADMIN','BOARD','CHAIR','VICE_CHAIR','MEMBER'];
         if(!allowed.includes(roleKey)) return res.status(400).json({error:'Yanlış rol.'});
         const name=String(displayName||'').trim();
         if(name.length<2||name.length>80) return res.status(400).json({error:'Rol adı 2-80 simvol olmalıdır.'});
@@ -39,7 +52,7 @@ module.exports = async (req, res) => {
     }
 
     if (req.query && req.query.resource === 'gallery') {
-      if (!['SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR'].includes(user.role)) return res.status(403).json({ error: 'İcazə yoxdur.' });
+      if (!['SUPER_ADMIN','ADMIN','BOARD','CHAIR','VICE_CHAIR'].includes(user.role)) return res.status(403).json({ error: 'İcazə yoxdur.' });
       if (req.method === 'GET') {
         const items = await sql`SELECT * FROM gallery ORDER BY sort_order DESC, created_at DESC`;
         return res.json({ items });
@@ -64,7 +77,7 @@ module.exports = async (req, res) => {
     }
 
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-    const isSuperOrAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(user.role);
+    const isSuperOrAdmin = ['SUPER_ADMIN', 'ADMIN', 'BOARD'].includes(user.role);
 
     let usersQuery, clubsQuery;
 

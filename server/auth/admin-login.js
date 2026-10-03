@@ -78,7 +78,7 @@ module.exports = async (req, res) => {
     }
 
     // Admin panelinə yalnız idarəetmə rolları daxil ola bilər.
-    const ADMIN_ROLES = ['SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR'];
+    const ADMIN_ROLES = ['SUPER_ADMIN','ADMIN','BOARD','CHAIR','VICE_CHAIR'];
     if (!ADMIN_ROLES.includes(user.role)) {
       return res.status(403).json({ error: 'Bu hesabın idarəetmə panelinə giriş icazəsi yoxdur.' });
     }

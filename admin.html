@@ -982,6 +982,7 @@
         <button class="nav-btn" data-tab="members" id="navMembers">
           <i class="fa-solid fa-users"></i> Üzvlər
         </button>
+        <button class="nav-btn" data-tab="socials" id="navSocials"><i class="fa-solid fa-share-nodes"></i> Sosial bağlantılar</button>
         <button class="nav-btn" data-tab="board" id="navBoard"><i class="fa-solid fa-user-tie"></i> İdarəetmə Şurası</button>
         <button class="nav-btn" data-tab="clubs" id="navClubs">
           <i class="fa-solid fa-landmark"></i> Klublar
@@ -1159,7 +1160,7 @@
             <select class="filter-select" id="memberRoleFilter">
               <option value="">Bütün rollar</option>
               <option value="SUPER_ADMIN">Baş Admin</option>
-              <option value="ADMIN">Admin</option>
+              <option value="BOARD">İdarəetmə Şurası</option><option value="ADMIN">Admin</option>
               <option value="CHAIR">Klub Sədri</option>
               <option value="VICE_CHAIR">Sədr Müavini</option>
               <option value="MEMBER">Üzv</option>
@@ -1330,6 +1331,15 @@
         <!-- ────────────────────────────────────────────────────── -->
         <!-- TAB 6: İCAZƏLƏR (PERMISSIONS)                          -->
         <!-- ────────────────────────────────────────────────────── -->
+        <section class="panel-view" id="panel-socials">
+          <div class="panel-header"><div><h3>Sosial bağlantılar</h3><p>Yalnız istifadəçi adı yazın. @ işarəsi də qəbul olunur. Boş saxlanan ikon saytda gizlənir.</p></div></div>
+          <form id="socialSettingsForm" class="table-card" style="padding:24px;max-width:600px">
+            <div class="form-group"><label for="socialInstagram"><i class="fa-brands fa-instagram"></i> Instagram</label><input id="socialInstagram" name="instagram" placeholder="oyu_thik" maxlength="80"></div>
+            <div class="form-group"><label for="socialTiktok"><i class="fa-brands fa-tiktok"></i> TikTok</label><input id="socialTiktok" name="tiktok" placeholder="oyu_thik" maxlength="80"></div>
+            <div class="form-group"><label for="socialTelegram"><i class="fa-brands fa-telegram"></i> Telegram</label><input id="socialTelegram" name="telegram" placeholder="oyu_thik" maxlength="80"></div>
+            <button class="btn btn-primary" type="submit">Yadda saxla</button>
+          </form>
+        </section>
         <section class="panel-view" id="panel-roles">
           <div class="panel-header">
             <div class="panel-header-left">
@@ -1623,7 +1633,7 @@
             </div>
           </div>
           <div class="form-grid-2">
-            <div class="form-group"><label for="editMemRole">Rol</label><select id="editMemRole" name="role"><option value="MEMBER">Üzv</option><option value="VICE_CHAIR">Sədr Müavini</option><option value="CHAIR">Klub Sədri</option><option value="ADMIN">Admin</option><option value="SUPER_ADMIN">Baş Admin</option></select><small id="editMemRoleHelp" class="role-help">Rolu yalnız Baş Admin dəyişə bilər.</small></div>
+            <div class="form-group"><label for="editMemRole">Rol</label><select id="editMemRole" name="role"><option value="MEMBER">Üzv</option><option value="VICE_CHAIR">Sədr Müavini</option><option value="CHAIR">Klub Sədri</option><option value="BOARD">İdarəetmə Şurası</option><option value="ADMIN">Admin</option><option value="SUPER_ADMIN">Baş Admin</option></select><small id="editMemRoleHelp" class="role-help">Rolu yalnız Baş Admin dəyişə bilər.</small></div>
             <div class="form-group"><label for="editMemClub">Klub</label><select id="editMemClub" name="clubId"><option value="">THİK / Klubsuz</option></select></div>
           </div>
           <div class="form-group">
@@ -1674,8 +1684,8 @@
           <div class="form-group">
             <label>Klubun Sosial Media Hesabları</label>
             <div class="form-grid-2">
-              <div class="form-group"><label for="clubInstagram"><i class="fa-brands fa-instagram"></i> Instagram</label><input id="clubInstagram" name="instagramUrl" type="url" placeholder="https://instagram.com/..."></div>
-              <div class="form-group"><label for="clubTikTok"><i class="fa-brands fa-tiktok"></i> TikTok</label><input id="clubTikTok" name="tiktokUrl" type="url" placeholder="https://tiktok.com/@..."></div>
+              <div class="form-group"><label for="clubInstagram"><i class="fa-brands fa-instagram"></i> Instagram</label><input id="clubInstagram" name="instagramUrl" type="text" placeholder="İstifadəçi adı: oyu_thik"></div>
+              <div class="form-group"><label for="clubTikTok"><i class="fa-brands fa-tiktok"></i> TikTok</label><input id="clubTikTok" name="tiktokUrl" type="text" placeholder="İstifadəçi adı: oyu_thik"></div>
               <div class="form-group"><label for="clubWhatsApp"><i class="fa-brands fa-whatsapp"></i> WhatsApp</label><input id="clubWhatsApp" name="whatsappUrl" type="url" placeholder="https://chat.whatsapp.com/..."></div>
               <div class="form-group"><label for="clubTelegram"><i class="fa-brands fa-telegram"></i> Telegram</label><input id="clubTelegram" name="telegramUrl" type="url" placeholder="https://t.me/..."></div>
             </div>
@@ -1940,6 +1950,7 @@
 
       if (tabName === 'members') renderMembersTable();
       if (tabName === 'roles') loadRoles();
+      if (tabName === 'socials') loadSocials();
       if (tabName === 'clubs') loadClubs();
       if (tabName === 'news') loadNews();
       if (tabName === 'events') loadEvents();
@@ -2011,6 +2022,7 @@
       const clearLogsBtn=document.getElementById('btnClearLogs'); if(clearLogsBtn) clearLogsBtn.style.display=currentUser.role==='SUPER_ADMIN'?'inline-flex':'none';
 
       // Adjust permissions visibility
+      document.getElementById('navSocials').style.display=['SUPER_ADMIN','ADMIN'].includes(currentUser.role)?'':'none';
       const isSuper = currentUser.role === 'SUPER_ADMIN';
       const perms = currentUser.permissions || [];
 
@@ -2082,6 +2094,21 @@
       if (hasPerm('manage_permissions')) loadPermissionsList();
     }
 
+    function canChangeMemberRole(member) {
+      if(currentUser.role==='SUPER_ADMIN')return true;
+      if(currentUser.role==='ADMIN')return member.role!=='SUPER_ADMIN';
+      return currentUser.role==='BOARD'&&!['SUPER_ADMIN','ADMIN'].includes(member.role);
+    }
+    function profileUsername(value){return String(value||'').replace(/^https?:\/\/(?:www\.)?(?:instagram\.com|tiktok\.com)\//i,'').replace(/^@/,'').replace(/\/$/,'');}
+    async function loadSocials(){
+      try { const d=await api('/admin?resource=socials'); for(const p of ['instagram','tiktok','telegram'])document.querySelector('#socialSettingsForm [name="'+p+'"]').value=(d.socials||[]).find(x=>x.platform===p)?.username||''; }
+      catch(e){showToast(e.message,'error');}
+    }
+    document.getElementById('socialSettingsForm').addEventListener('submit',async e=>{
+      e.preventDefault(); const button=e.target.querySelector('button');button.disabled=true;
+      try{await api('/admin?resource=socials',{method:'PATCH',body:JSON.stringify(Object.fromEntries(new FormData(e.target)))});showToast('Sosial bağlantılar yeniləndi!');}
+      catch(err){showToast(err.message,'error');}finally{button.disabled=false;}
+    });
     async function loadRoles(){
       const box=document.getElementById('rolesGrid'); if(!box)return;
       try{
@@ -2221,7 +2248,7 @@
           </td>
           <td>${esc(m.group_no || '—')}${m.faculty ? `<br><small style="color:var(--admin-muted);">${esc(m.faculty)}</small>` : ''}</td>
           <td>${esc(m.club_name || 'THİK')}</td>
-          <td><span class="role-badge role-${m.role}">${roleLabel(m.role)}</span></td>
+          <td><span class="role-badge role-${m.role}">${roleLabel(m.role)}</span>${canChangeMemberRole(m)?`<button class="btn-action" onclick="openEditMemberModal(${m.id})" title="Rolu dəyiş"><i class="fa-solid fa-user-gear"></i> Rol dəyiş</button>`:''}</td>
           <td>${esc(m.position_in_club || '—')}</td>
           <td>
             <span class="status-badge ${m.active ? 'status-active' : 'status-inactive'}">
@@ -2314,7 +2341,7 @@
       document.getElementById('editMemGroup').value = m.group_no || '';
       document.getElementById('editMemFaculty').value = m.faculty || '';
       document.getElementById('editMemPosition').value = m.position_in_club || '';
-      const roleSel=document.getElementById('editMemRole'); roleSel.value=m.role||'MEMBER'; roleSel.disabled=currentUser.role!=='SUPER_ADMIN'; document.getElementById('editMemRoleHelp').textContent=currentUser.role==='SUPER_ADMIN'?'Baş Admin bu üzvün sistem rolunu dəyişə bilər.':'Rolu yalnız Baş Admin dəyişə bilər.';
+      const roleSel=document.getElementById('editMemRole'); roleSel.value=m.role||'MEMBER'; roleSel.disabled=!canChangeMemberRole(m); [...roleSel.options].forEach(o=>o.hidden=currentUser.role!=='SUPER_ADMIN'&&o.value==='SUPER_ADMIN'||currentUser.role==='BOARD'&&o.value==='ADMIN'); document.getElementById('editMemRoleHelp').textContent=canChangeMemberRole(m)?'Üzvün rolunu seçib yadda saxlayın.':'Bu hesabın rolunu dəyişmək üçün icazəniz yoxdur.';
       const clubSel=document.getElementById('editMemClub'); clubSel.innerHTML='<option value="">THİK / Klubsuz</option>'+allClubs.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join(''); clubSel.value=m.club_id||'';
       document.getElementById('editMemPhotoUrl').value=m.photo_url||''; setMemberPhotoPreview(m.photo_url||'');
       document.getElementById('editMemActive').value = m.active ? 'true' : 'false';
@@ -2327,7 +2354,7 @@
       const data = Object.fromEntries(new FormData(form).entries());
       data.active = data.active === 'true';
       delete data.editMemPhotoFile;
-      if(currentUser.role!=='SUPER_ADMIN') delete data.role;
+      if(!canChangeMemberRole(allMembers.find(m=>m.id===Number(data.id))||{})) delete data.role;
 
       try {
         const pf=document.getElementById('editMemPhotoFile').files[0];
@@ -2379,8 +2406,8 @@
 
     function renderManagementBoard(){
       const el=document.getElementById('managementBoardGrid'); if(!el)return;
-      const people=allMembers.filter(m=>['SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR'].includes(m.role));
-      el.innerHTML=people.length?people.map(m=>'<article class="board-person-card"><div class="board-avatar">'+(m.photo_url?'<img src="'+esc(m.photo_url)+'">':esc((m.full_name||'?')[0]))+'</div><div><span class="role-badge role-'+m.role+'">'+esc(m.role==='SUPER_ADMIN'?'Baş Administrator':m.role==='ADMIN'?'Administrator':m.role==='CHAIR'?'Klub Sədri':m.role==='VICE_CHAIR'?'Sədr Müavini':'Üzv')+'</span><h4>'+esc(m.full_name)+'</h4><p>'+esc(m.club_name||'OYU THİK')+(m.position_in_club?' • '+esc(m.position_in_club):'')+'</p><button class="btn-action" onclick="openEditMemberModal('+m.id+')"><i class="fa-solid fa-pen"></i> İdarə et</button></div></article>').join(''):'<p>İdarəetmə heyəti tapılmadı.</p>';
+      const people=allMembers.filter(m=>['SUPER_ADMIN','ADMIN','BOARD','CHAIR','VICE_CHAIR'].includes(m.role));
+      el.innerHTML=people.length?people.map(m=>'<article class="board-person-card"><div class="board-avatar">'+(m.photo_url?'<img src="'+esc(m.photo_url)+'">':esc((m.full_name||'?')[0]))+'</div><div><span class="role-badge role-'+m.role+'">'+esc(m.role==='SUPER_ADMIN'?'Baş Administrator':m.role==='ADMIN'?'Administrator':m.role==='BOARD'?'İdarəetmə Şurası':m.role==='CHAIR'?'Klub Sədri':m.role==='VICE_CHAIR'?'Sədr Müavini':'Üzv')+'</span><h4>'+esc(m.full_name)+'</h4><p>'+esc(m.club_name||'OYU THİK')+(m.position_in_club?' • '+esc(m.position_in_club):'')+'</p><button class="btn-action" onclick="openEditMemberModal('+m.id+')"><i class="fa-solid fa-pen"></i> İdarə et</button></div></article>').join(''):'<p>İdarəetmə heyəti tapılmadı.</p>';
     }
     async function clearAllLogs(){if(!confirm('Bütün fəaliyyət logları silinəcək. Davam edilsin?'))return;try{await api('/admin/logs',{method:'DELETE',body:JSON.stringify({all:true})});showToast('Bütün loglar silindi!');fetchLogs(1)}catch(e){alert(e.message||'Xəta baş verdi')}}
     // ──────────────────────────────────────────────────────────
@@ -2463,8 +2490,8 @@
       document.getElementById('clubId').value = c.id;
       document.getElementById('clubName').value = c.name;
       document.getElementById('clubDescription').value = c.description || '';
-      document.getElementById('clubInstagram').value = c.instagram_url || '';
-      document.getElementById('clubTikTok').value = c.tiktok_url || '';
+      document.getElementById('clubInstagram').value = profileUsername(c.instagram_url);
+      document.getElementById('clubTikTok').value = profileUsername(c.tiktok_url);
       document.getElementById('clubWhatsApp').value = c.whatsapp_url || '';
       document.getElementById('clubTelegram').value = c.telegram_url || '';
       document.getElementById('clubLogoUrl').value = c.logo_url || '';

@@ -1,3 +1,4 @@
+const {socialUrl} = require('../_socials');
 /**
  * GET  /api/admin/clubs  — list clubs
  * POST /api/admin/clubs  — create club
@@ -48,7 +49,8 @@ module.exports = async (req, res) => {
     const user = await requirePermission(req, res, 'manage_clubs');
     if (!user) return;
 
-    const { name, description, logoUrl, instagramUrl, tiktokUrl, whatsappUrl, telegramUrl } = req.body || {};
+    let { name, description, logoUrl, instagramUrl, tiktokUrl, whatsappUrl, telegramUrl } = req.body || {};
+    try { instagramUrl=socialUrl('instagram',instagramUrl||''); tiktokUrl=socialUrl('tiktok',tiktokUrl||''); } catch(e) { return res.status(400).json({error:e.message}); }
     if (!name || typeof name !== 'string' || name.trim().length < 2) {
       return res.status(400).json({ error: 'Klub adı tələb olunur.' });
     }
@@ -76,7 +78,8 @@ module.exports = async (req, res) => {
     const user = await requireAdminAuth(req, res);
     if (!user) return;
 
-    const { id, name, description, logoUrl, instagramUrl, tiktokUrl, whatsappUrl, telegramUrl, leadershipAction, memberId } = req.body || {};
+    let { id, name, description, logoUrl, instagramUrl, tiktokUrl, whatsappUrl, telegramUrl, leadershipAction, memberId } = req.body || {};
+    try { if(instagramUrl!==undefined) instagramUrl=socialUrl('instagram',instagramUrl); if(tiktokUrl!==undefined) tiktokUrl=socialUrl('tiktok',tiktokUrl); } catch(e) { return res.status(400).json({error:e.message}); }
     if (!id) return res.status(400).json({ error: 'id tələb olunur.' });
     if (!['SUPER_ADMIN','ADMIN'].includes(user.role) && parseInt(id) !== user.club_id) {
       return res.status(403).json({ error: 'Yalnız öz klubunuzu idarə edə bilərsiniz.' });

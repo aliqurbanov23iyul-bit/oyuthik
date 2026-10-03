@@ -149,7 +149,7 @@ async function getAdminSession(req) {
     WHERE s.id = ${sessionId}
       AND s.expires_at > now()
       AND u.active = true
-      AND u.role IN ('SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR')
+      AND u.role IN ('SUPER_ADMIN','ADMIN','BOARD','CHAIR','VICE_CHAIR')
       AND (u.role = 'SUPER_ADMIN' OR ac.active = true)
     LIMIT 1
   `;
@@ -176,6 +176,7 @@ async function getAdminSession(req) {
     // Sadə rol modeli: rol minimum səlahiyyətləri özü müəyyən edir.
     // user_permissions yalnız əlavə/fərdi icazələr üçündür.
     const roleDefaults = {
+      BOARD: ['view_members','edit_member'],
       ADMIN: ['manage_club','manage_clubs','view_members','create_member','edit_member','delete_member','create_news','edit_news','delete_news','create_event','edit_event','delete_event','manage_leadership'],
       CHAIR: ['manage_club','view_members','create_member','edit_member','delete_member','create_news','edit_news','create_event','edit_event'],
       VICE_CHAIR: ['manage_club','view_members','create_member','edit_member','create_news','edit_news','create_event','edit_event']

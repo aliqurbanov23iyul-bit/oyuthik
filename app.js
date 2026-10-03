@@ -106,6 +106,7 @@ function roleLabel(role) {
   const labels = {
     SUPER_ADMIN: 'Baş Administrator',
     ADMIN: 'İdarəçi',
+    BOARD: 'İdarəetmə Şurası',
     CHAIR: 'Klub Sədri',
     VICE_CHAIR: 'Sədr Müavini',
     MEMBER: 'Üzv',
@@ -222,7 +223,7 @@ async function syncPublicMemberNav(){
     const u=d&&d.user;if(!u)return;
     const name=u.fullName||'Üzv';
     const position=u.positionInClub||roleLabel(u.role);
-    const canManage=['SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR'].includes(u.role);
+    const canManage=['SUPER_ADMIN','ADMIN','BOARD','CHAIR','VICE_CHAIR'].includes(u.role);
     hosts.forEach((host,idx)=>{
       host.innerHTML='<div class="member-menu-wrap"><button class="member-chip shared-member-chip" type="button"><i class="fa-solid fa-user"></i><span>'+esc(name)+'</span><i class="fa-solid fa-chevron-down"></i></button><div class="member-dropdown shared-member-dropdown"><div class="member-head"><div class="member-avatar">'+esc(name[0]||'?')+'</div><div><b>'+esc(name)+'</b><small>'+esc(position)+'</small></div></div><div class="member-info"><span><i class="fa-solid fa-building-columns"></i>'+esc(u.clubName||'Klub qeyd edilməyib')+'</span><span><i class="fa-solid fa-graduation-cap"></i>'+esc(u.faculty||'Fakültə qeyd edilməyib')+'</span><span><i class="fa-solid fa-users"></i>'+esc(u.groupNo||'Qrup qeyd edilməyib')+'</span></div>'+(canManage?'<a class="member-action" href="admin.html"><i class="fa-solid fa-sliders"></i> İdarə paneli</a>':'')+'<button class="member-action logout shared-member-logout"><i class="fa-solid fa-right-from-bracket"></i> Çıxış</button></div></div>';
       const chip=host.querySelector('.shared-member-chip'),drop=host.querySelector('.shared-member-dropdown');
@@ -289,3 +290,19 @@ function initMobileNavigation(){
 
 }
 document.addEventListener('DOMContentLoaded',initMobileNavigation);
+
+async function loadFooterSocials(){
+  if (!document.querySelector('.footer .socials')) return;
+  try {
+    const d=await api('/public');
+    for(const platform of ['instagram','tiktok','telegram']){
+      const row=(d.socials||[]).find(x=>x.platform===platform);
+      const link=document.querySelector('.footer .socials a:has(.fa-'+platform+')');
+      if(!link)continue;
+      if(!row?.username){link.hidden=true;continue;}
+      link.hidden=false;link.href='https://'+({instagram:'instagram.com/',tiktok:'tiktok.com/@',telegram:'t.me/'}[platform])+encodeURIComponent(row.username);
+      link.target='_blank';link.rel='noopener noreferrer';
+    }
+  }catch(e){console.error('Sosial bağlantılar yüklənmədi.');}
+}
+document.addEventListener('DOMContentLoaded',loadFooterSocials);

@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
 
     try {
       const sql = db();
-      const isSuperOrAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(user.role);
+      const isSuperOrAdmin = ['SUPER_ADMIN', 'ADMIN', 'BOARD'].includes(user.role);
 
       const members = isSuperOrAdmin
         ? await sql`
@@ -58,7 +58,7 @@ module.exports = async (req, res) => {
 
     // CHAIR yalnız öz klubuna üzv əlavə edə bilər
     const targetClubId = (() => {
-      if (['SUPER_ADMIN', 'ADMIN'].includes(user.role)) {
+      if (['SUPER_ADMIN', 'ADMIN', 'BOARD'].includes(user.role)) {
         return clubId ? parseInt(clubId) : null;
       }
       return user.club_id; // CHAIR öz klubunu məcbur olaraq seçir
@@ -108,7 +108,7 @@ module.exports = async (req, res) => {
       const sql = db();
 
       // Club scope: CHAIR yalnız öz üzvlərini redaktə edə bilər
-      if (!['SUPER_ADMIN', 'ADMIN'].includes(user.role)) {
+      if (!['SUPER_ADMIN', 'ADMIN', 'BOARD'].includes(user.role)) {
         const target = await sql`SELECT club_id FROM users WHERE id = ${parseInt(id)} LIMIT 1`;
         if (!target[0] || target[0].club_id !== user.club_id) {
           return res.status(403).json({ error: 'Bu üzvü redaktə etmək üçün icazəniz yoxdur.' });
@@ -120,11 +120,16 @@ module.exports = async (req, res) => {
       if (targetBefore[0].role === 'SUPER_ADMIN' && user.role !== 'SUPER_ADMIN') {
         return res.status(403).json({ error: 'Baş Admin rolunu yalnız Baş Admin dəyişə bilər.' });
       }
+      if (user.role === 'BOARD' && ['SUPER_ADMIN','ADMIN'].includes(targetBefore[0].role)) {
+        return res.status(403).json({error:'İdarəetmə Şurası admin hesablarını dəyişə bilməz.'});
+      }
       let safeRole = undefined;
       if (role !== undefined) {
-        if (user.role === 'SUPER_ADMIN') safeRole = ['SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR','MEMBER'].includes(role) ? role : undefined;
-        else if (user.role === 'ADMIN') safeRole = ['ADMIN','CHAIR','VICE_CHAIR','MEMBER'].includes(role) ? role : undefined;
+        if (user.role === 'SUPER_ADMIN') safeRole = ['SUPER_ADMIN','ADMIN','BOARD','CHAIR','VICE_CHAIR','MEMBER'].includes(role) ? role : undefined;
+        else if (user.role === 'ADMIN') safeRole = ['ADMIN','BOARD','CHAIR','VICE_CHAIR','MEMBER'].includes(role) ? role : undefined;
+        if (user.role === 'BOARD') safeRole = ['BOARD','CHAIR','VICE_CHAIR','MEMBER'].includes(role) ? role : undefined;
       }
+      if (role !== undefined && safeRole === undefined) return res.status(403).json({error:'Bu rolu təyin etmək üçün icazəniz yoxdur.'});
       const safeClubId = ['SUPER_ADMIN','ADMIN'].includes(user.role) && clubId !== undefined ? (clubId ? parseInt(clubId) : null) : undefined;
 
       const targetId = parseInt(id);
@@ -134,7 +139,13 @@ module.exports = async (req, res) => {
       if (groupNo !== undefined) await sql`UPDATE users SET group_no = ${groupNo || null} WHERE id = ${targetId}`;
       if (faculty !== undefined) await sql`UPDATE users SET faculty = ${faculty || null} WHERE id = ${targetId}`;
       if (positionInClub !== undefined) await sql`UPDATE users SET position_in_club = ${positionInClub || null} WHERE id = ${targetId}`;
-      if (safeRole !== undefined) await sql`UPDATE users SET role = ${safeRole} WHERE id = ${targetId}`;
+      if (safeRole !== undefined && safeRole !== targetBefore[0].role) {
+        await sql.transaction([
+          sql`UPDATE users SET role = ${safeRole} WHERE id = ${targetId}`,
+          sql`DELETE FROM user_permissions WHERE user_id = ${targetId}`,
+          sql`DELETE FROM admin_sessions WHERE user_id = ${targetId}`
+        ]);
+      }
       if (safeClubId !== undefined) await sql`UPDATE users SET club_id = ${safeClubId} WHERE id = ${targetId}`;
       if (photoUrl !== undefined) await sql`UPDATE users SET photo_url = ${photoUrl || null} WHERE id = ${targetId}`;
       if (active !== undefined) await sql`UPDATE users SET active = ${!!active} WHERE id = ${targetId}`;
@@ -168,7 +179,7 @@ module.exports = async (req, res) => {
       // Club scope + iyerarxiya yoxlaması
       const targetForDelete = await sql`SELECT id, club_id, role, full_name FROM users WHERE id = ${parseInt(id)} LIMIT 1`;
       if (!targetForDelete[0]) return res.status(404).json({ error: 'Üzv tapılmadı.' });
-      if (!['SUPER_ADMIN', 'ADMIN'].includes(user.role)) {
+      if (!['SUPER_ADMIN', 'ADMIN', 'BOARD'].includes(user.role)) {
         if (targetForDelete[0].club_id !== user.club_id) {
           return res.status(403).json({ error: 'Bu üzvü idarə etmək üçün icazəniz yoxdur.' });
         }
