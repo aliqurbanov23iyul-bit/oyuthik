@@ -15,7 +15,7 @@ ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
 ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;
 --    Yenisini əlavə et
 ALTER TABLE users ADD CONSTRAINT users_role_check
-  CHECK (role IN ('SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR','MEMBER'));
+  CHECK (role IN ('SUPER_ADMIN','ADMIN','BOARD','CHAIR','VICE_CHAIR','MEMBER'));
 
 -- 3. Permissions cədvəli (mövcud icazə açarları)
 CREATE TABLE IF NOT EXISTS permissions (
@@ -153,7 +153,7 @@ ALTER TABLE events ADD COLUMN IF NOT EXISTS cover_url TEXT;
 
 -- Vice chair role support
 ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;
-ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('SUPER_ADMIN','ADMIN','CHAIR','VICE_CHAIR','MEMBER'));
+ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('SUPER_ADMIN','ADMIN','BOARD','CHAIR','VICE_CHAIR','MEMBER'));
 
 
 -- Discord-style role presentation settings.
@@ -169,6 +169,7 @@ CREATE TABLE IF NOT EXISTS role_settings(
 INSERT INTO role_settings(role_key,display_name,color,sort_order,protected) VALUES
  ('SUPER_ADMIN','Baş Admin','#dc2626',100,true),
  ('ADMIN','Admin','#7c3aed',80,true),
+ ('BOARD','İdarəetmə Şurası','#0891b2',70,true),
  ('CHAIR','Klub Sədri','#174fae',60,true),
  ('VICE_CHAIR','Sədr Müavini','#0f9f78',40,true),
  ('MEMBER','Üzv','#64748b',20,true)
@@ -186,3 +187,5 @@ CREATE TABLE IF NOT EXISTS gallery(
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_gallery_sort ON gallery(sort_order DESC,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS site_socials(platform TEXT PRIMARY KEY, username TEXT NOT NULL DEFAULT '');

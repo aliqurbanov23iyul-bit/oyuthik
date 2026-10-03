@@ -5,7 +5,7 @@
   "scripts": {
     "migrate": "node migration-runner.js",
     "seed": "node seed-admin.js",
-    "test": "node test-suite.js"
+    "test": "node test-suite.js && node tests-role-socials.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
